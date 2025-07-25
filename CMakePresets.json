@@ -54,8 +54,8 @@
       "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang-17",
-        "CMAKE_CXX_COMPILER": "clang++-17",
+        "CMAKE_CXX_COMPILER": "clang++-19",
+        "CMAKE_C_COMPILER": "clang-19",
         "CMAKE_CXX_FLAGS_INIT": "$env{CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic"
       }
     },
@@ -80,7 +80,11 @@
       "name": "unix-rel-ninja",
       "displayName": "Unix Ninja Clang Release",
       "binaryDir": "${sourceDir}/build/unix-rel-ninja",
-      "inherits": ["unix-ninja", "rel", "conan-rel-unix"],
+      "inherits": [
+        "unix-ninja",
+        "rel",
+        "conan-rel-unix"
+      ],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-rel-ninja/install"
       }
@@ -89,7 +93,11 @@
       "name": "unix-deb-ninja",
       "displayName": "Unix Ninja Clang Debug",
       "binaryDir": "${sourceDir}/build/unix-deb-ninja",
-      "inherits": ["unix-ninja", "deb", "conan-deb-unix"],
+      "inherits": [
+        "unix-ninja",
+        "deb",
+        "conan-deb-unix"
+      ],
       "cacheVariables": {
         "CMAKE_CXX_FLAGS": "-O0 --coverage -g -fsanitize=address",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-deb-ninja/install"
@@ -99,7 +107,11 @@
       "name": "vs2022-rel",
       "displayName": "Visual Studio 2022 Release",
       "binaryDir": "${sourceDir}/build/vs2022-rel",
-      "inherits": ["vs2022", "rel", "conan-rel"],
+      "inherits": [
+        "vs2022",
+        "rel",
+        "conan-rel"
+      ],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/vs2022-rel/install"
       }
@@ -108,7 +120,11 @@
       "name": "vs2022-deb",
       "displayName": "Visual Studio 2022 Debug",
       "binaryDir": "${sourceDir}/build/vs2022-deb",
-      "inherits": ["vs2022", "deb", "conan-deb"],
+      "inherits": [
+        "vs2022",
+        "deb",
+        "conan-deb"
+      ],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/vs2022-deb/install"
       }
@@ -117,7 +133,11 @@
       "name": "vs2022-rel-shared",
       "displayName": "Visual Studio 2022 Release Shared",
       "binaryDir": "${sourceDir}/build/vs2022-rel-shared",
-      "inherits": ["vs2022-shared", "rel", "conan-rel"],
+      "inherits": [
+        "vs2022-shared",
+        "rel",
+        "conan-rel"
+      ],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/vs2022-rel/install"
       }
@@ -126,7 +146,11 @@
       "name": "vs2022-deb-shared",
       "displayName": "Visual Studio 2022 Debug Shared",
       "binaryDir": "${sourceDir}/build/vs2022-deb-shared",
-      "inherits": ["vs2022-shared", "deb", "conan-deb"],
+      "inherits": [
+        "vs2022-shared",
+        "deb",
+        "conan-deb"
+      ],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/vs2022-rel/install"
       }
