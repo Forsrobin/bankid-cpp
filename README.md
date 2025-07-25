@@ -25,22 +25,29 @@ A comprehensive C++ library and REST API server for BankID authentication, built
 
 ## Overview
 
-This project provides both a BankID library that can be built as a static library or DLL, and a sample REST API server that demonstrates its usage. The library supports all BankID API endpoints including authentication, signing, payments, and phone-based operations.
+This project provides a comprehensive **BankID C++ library** that implements the complete BankID API for authentication, signing, and payment operations. The library is designed for easy integration into your own applications and includes a simple HTTP server example to demonstrate its usage.
+
+> [!NOTE]
+> **Focus**: The primary goal is to provide a robust, production-ready BankID library. The included server is just a demonstration example.
 
 ### Key Features
 
 - **Full BankID API Coverage**: Auth, Sign, Payment, Phone Auth, Phone Sign, Other Payment, Collect, and Cancel
 - **Modern C++**: Built with C++23 standards using `std::expected` for error handling
+- **Easy Integration**: Simple API designed for seamless integration into your applications
 - **Cross-Platform**: Windows DLL support with cross-platform compatibility
-- **REST API Server**: Ready-to-use server built with CrowCpp
-- **QR Code Generation**: Built-in QR code generator with caching
+- **QR Code Generation**: Built-in QR code generator with automatic caching
 - **Comprehensive Testing**: Google Test framework integration
 - **SSL/TLS Support**: OpenSSL integration for secure communication
+- **Example HTTP Server**: Demo server built with CrowCpp to showcase library usage
+
+> [!WARNING]
+> **Important**: To test the library or demo server, you will need a **BankID test account** and valid test certificates from BankID.
 
 ## Project Structure
 
 ```
-├── bankid/                     # Core BankID library
+├── bankid/                     # 🎯 Core BankID Library (Main Focus)
 │   ├── bankid.cpp             # Library implementation
 │   ├── includes/
 │   │   ├── bankid.h           # Main public API header
@@ -54,8 +61,8 @@ This project provides both a BankID library that can be built as a static librar
 │   │       ├── collect.h      # Status collection
 │   │       ├── cancel.h       # Order cancellation
 │   │       └── responses.h    # Response structures
-├── server/                     # REST API server
-│   ├── main.cpp               # Server implementation
+├── server/                     # 📋 Example HTTP Server (Demo Only)
+│   ├── main.cpp               # Simple demo server
 │   ├── certs/                 # SSL certificates
 │   └── includes/
 ├── tests/                      # Unit tests
@@ -140,8 +147,8 @@ cmake --preset vs2022-deb
 # Build the library and server
 cmake --build build/vs2022-deb --config Debug
 
-# Run server
-build/vs2022-deb/server/Debug/bankid_server.exe
+# Run server (cd into directory to ensure correct certificate paths)
+cd build/vs2022-deb/server/Debug && ./bankid_server.exe
 ```
 
 #### Build as Shared Library/DLL
@@ -153,8 +160,8 @@ cmake --preset vs2022-deb-shared
 # Build
 cmake --build build/vs2022-deb-shared --config Debug
 
-# Run server
-build/vs2022-deb-shared/server/Debug/bankid_server.exe
+# Run server (cd into directory to ensure correct certificate paths)
+cd build/vs2022-deb-shared/server/Debug && ./bankid_server.exe
 ```
 
 #### VS Code Integration
@@ -172,7 +179,10 @@ cmake --install build/vs2022-deb --config Debug
 
 ## API Endpoints
 
-The REST API server provides the following endpoints:
+> [!IMPORTANT]
+> **Demo Server Only**: These HTTP endpoints are provided by the example server for demonstration. In your own application, you'll use the C++ library functions directly.
+
+The example HTTP server provides the following endpoints:
 
 ### GET /init
 
@@ -229,6 +239,20 @@ GET http://localhost:8080/poll
 
 ## Code Examples
 
+> [!TIP]
+> **Integration Focus**: These examples show how to integrate the BankID library into **your own application**. This is the primary use case for this library.
+
+### Integrating into Your CMake Project
+
+First, add the library to your CMake project:
+
+```cmake
+find_package(BankID REQUIRED)
+
+# Link against the library
+target_link_libraries(your_target PRIVATE BankID::bankid_lib)
+```
+
 ### Basic Library Usage
 
 ```cpp
@@ -277,15 +301,6 @@ if (authResult.has_value()) {
 }
 ```
 
-### Using in Your CMake Project
-
-```cmake
-find_package(BankID REQUIRED)
-
-# Link against the library
-target_link_libraries(your_target PRIVATE BankID::bankid_lib)
-```
-
 ### Advanced Authentication with Requirements
 
 ```cpp
@@ -317,6 +332,9 @@ if (signResult.has_value()) {
 ```
 
 ## SSL Certificate Setup
+
+> [!CAUTION]
+> **Certificates Required**: BankID APIs require valid SSL certificates. You must obtain test certificates from BankID to use this library.
 
 To use BankID APIs, you need SSL certificates in PEM format. BankID provides PKCS#12 (.p12) files that need to be converted.
 
@@ -360,6 +378,9 @@ if (!testConfig.validate()) {
 ```
 
 ## QR Code Generation
+
+> [!NOTE]
+> **Automatic QR Handling**: The library includes built-in QR code generation that automatically updates every second for seamless user experience.
 
 The library includes a built-in QR code generator for seamless user experience.
 
@@ -694,18 +715,6 @@ We welcome contributions to improve the BankID C++ library! Here's how you can h
    build/vs2022-deb/tests/Debug/bankid_tests.exe
    ```
 
-### Contribution Guidelines
-
-#### Code Style
-
-- Follow **Modern C++** practices (C++23 features encouraged)
-- Use `std::expected` for error handling
-- Follow existing naming conventions:
-  - Classes: `PascalCase`
-  - Functions: `camelCase`
-  - Variables: `snake_case` for private members (`m_` prefix)
-  - Constants: `UPPER_CASE`
-
 #### Pull Request Process
 
 1. **Create Feature Branch**
@@ -774,7 +783,7 @@ When reporting issues, please include:
 
 ### BankID Resources
 
-- **Official BankID Documentation**: [https://www.bankid.com/utvecklare](https://www.bankid.com/utvecklare)
+- **Official BankID Documentation**: [https://developers.bankid.com/](https://developers.bankid.com/)
 - **BankID API Specification**: Available from BankID developer portal
 - **Test Environment**: Contact BankID for test certificates and access
 
