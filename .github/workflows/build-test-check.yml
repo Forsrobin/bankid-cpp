@@ -45,12 +45,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build clang-17 clang++-17 libc++-17-dev libc++abi-17-dev
-          # Verify ninja is installed and accessible
-          which ninja
-          ninja --version
-          # Check clang version and C++23 support
-          clang++-17 --version
+          sudo apt-get install -y ninja-build clang-17
 
       - name: Install Conan
         run: |
@@ -81,8 +76,7 @@ jobs:
       - name: Configure CMake
         run: |
           export PATH="/usr/bin:$PATH"
-          EXTRA_CXX_FLAGS="-stdlib=libc++ -std=c++23"
-          cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }}  -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja -DCMAKE_CXX_STANDARD=23 -DCMAKE_CXX_FLAGS="-stdlib=libc++"
+          cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }}  -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja
 
       - name: Build project
         run: |
