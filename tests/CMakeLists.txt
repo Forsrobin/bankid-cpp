@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Enable testing
+enable_testing()
+
 # Find required packages
 find_package(GTest REQUIRED)
 find_package(nlohmann_json REQUIRED)
@@ -40,8 +43,7 @@ set_target_properties(bankid_tests PROPERTIES
     CXX_EXTENSIONS OFF
 )
 
-# Enable testing
-enable_testing()
+
 
 # Manual test registration as fallback
 
