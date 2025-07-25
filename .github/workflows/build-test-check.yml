@@ -1,0 +1,97 @@
+name: CI Build and Test
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    strategy:
+      matrix:
+        config:
+          - name: "Release Static"
+            build_type: "Release"
+            conan_profile: "Release"
+            cmake_preset: "unix-rel-ninja"
+            shared: false
+          - name: "Release Shared"
+            build_type: "Release"
+            conan_profile: "Release"
+            cmake_preset: "unix-rel-ninja"  # Will be modified for shared
+            shared: true
+          - name: "Debug Static"
+            build_type: "Debug"
+            conan_profile: "Debug"
+            cmake_preset: "unix-deb-ninja"
+            shared: false
+          - name: "Debug Shared"
+            build_type: "Debug"
+            conan_profile: "Debug"
+            cmake_preset: "unix-deb-ninja"  # Will be modified for shared
+            shared: true
+
+    runs-on: ubuntu-latest
+    name: ${{ matrix.config.name }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ninja-build clang-17 clang++-17
+
+    - name: Install Conan
+      run: |
+        python -m pip install --upgrade pip
+        pip install conan
+
+    - name: Configure Conan
+      run: |
+        conan profile detect --force
+
+    - name: Install dependencies with Conan
+      run: |
+        conan install . -s build_type=${{ matrix.config.conan_profile }} -of=conan/${{ matrix.config.build_type == 'Debug' && 'debug' || 'release' }} --build=missing
+
+    - name: Set up CMake preset name
+      id: cmake_preset
+      run: |
+        if [ "${{ matrix.config.shared }}" = "true" ]; then
+          # For shared builds, we need to use the shared presets (though they don't exist in the current config)
+          # We'll use the regular presets and override BUILD_SHARED_LIBS
+          echo "preset=${{ matrix.config.cmake_preset }}" >> $GITHUB_OUTPUT
+          echo "shared_flag=-DBUILD_SHARED_LIBS=ON" >> $GITHUB_OUTPUT
+        else
+          echo "preset=${{ matrix.config.cmake_preset }}" >> $GITHUB_OUTPUT
+          echo "shared_flag=-DBUILD_SHARED_LIBS=OFF" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Configure CMake
+      run: |
+        cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }}
+
+    - name: Build project
+      run: |
+        cmake --build --preset ${{ matrix.config.build_type == 'Debug' && 'unix-deb-ninja' || 'unix-rel-ninja' }}
+
+    - name: Run tests
+      run: |
+        cd build/${{ matrix.config.cmake_preset }}
+        ctest --output-on-failure --parallel $(nproc)
+
+    - name: Upload build artifacts (on failure)
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs-${{ matrix.config.name }}
+        path: |
+          build/
+          !build/**/CMakeFiles/
+        retention-days: 7
