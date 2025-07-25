@@ -9,11 +9,11 @@ jobs:
     strategy:
       matrix:
         config:
-          - name: 'Release Static'
-            build_type: 'Release'
-            conan_profile: 'Release'
-            cmake_preset: 'unix-rel-ninja'
-            shared: false
+          # - name: 'Release Static'
+          #   build_type: 'Release'
+          #   conan_profile: 'Release'
+          #   cmake_preset: 'unix-rel-ninja'
+          #   shared: false
           # - name: "Release Shared"
           #   build_type: "Release"
           #   conan_profile: "Release"
@@ -24,11 +24,11 @@ jobs:
           #   conan_profile: "Debug"
           #   cmake_preset: "unix-deb-ninja"
           #   shared: false
-          # - name: "Debug Shared"
-          #   build_type: "Debug"
-          #   conan_profile: "Debug"
-          #   cmake_preset: "unix-deb-ninja"  # Will be modified for shared
-          #   shared: true
+          - name: "Debug Shared"
+            build_type: "Debug"
+            conan_profile: "Debug"
+            cmake_preset: "unix-deb-ninja"  # Will be modified for shared
+            shared: true
 
     runs-on: ubuntu-latest
     name: ${{ matrix.config.name }}
@@ -82,7 +82,7 @@ jobs:
         run: |
           export PATH="/usr/bin:$PATH"
           EXTRA_CXX_FLAGS="-stdlib=libc++ -std=c++23"
-          cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }}  -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja"
+          cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }}  -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja
 
       - name: Build project
         run: |
