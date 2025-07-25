@@ -9,8 +9,8 @@ bool file_exists(const std::string &path)
 namespace BankID
 {
   // New Session implementation using SSLConfig only
-  Session::Session(const SSLConfig &sslConfig)
-      : m_sslConfig(sslConfig), m_initialized(false), m_cli(nullptr)
+  Session::Session(const SSLConfig &sslConfig, const bool showDebugLog)
+      : m_sslConfig(sslConfig), m_initialized(false), m_cli(nullptr), m_showDebugLog(showDebugLog)
   {
     m_initialized = initialize();
   }
@@ -27,7 +27,10 @@ namespace BankID
   {
     if (!m_sslConfig.validate())
     {
-      std::cerr << "BankID Session: SSL configuration validation failed" << std::endl;
+      if (m_showDebugLog)
+      {
+        std::cerr << "BankID Session: SSL configuration validation failed" << std::endl;
+      }
       m_cli = nullptr;
       return false;
     }
@@ -106,15 +109,23 @@ namespace BankID
   {
     if (!m_initialized)
     {
-      std::cout << "BankID Session: Session not initialized" << std::endl;
+      if (m_showDebugLog)
+      {
+        std::cerr << "BankID Session: Session not initialized" << std::endl;
+      }
+
       return std::unexpected(BankID::AuthError{
           500,
           BankID::BankIdErrorCode::NOT_INITIALIZED, "Session not initialized"});
     }
 
     auto payload = config.toJson();
-    std::cout << "BankID Session: Sending request to " << endpoint << std::endl;
-    std::cout << "Payload: " << payload.dump(2) << std::endl;
+
+    if (m_showDebugLog)
+    {
+      std::cout << "BankID Session: Making API call to " << endpoint << std::endl;
+      std::cout << "Payload: " << payload.dump(2) << std::endl;
+    }
 
     payload = payload.dump();
     auto res = m_cli->Post(("/rp/v6.0" + endpoint).c_str(),
@@ -131,10 +142,16 @@ namespace BankID
   {
     if (!res)
     {
+      if (m_showDebugLog)
+      {
+        std::cerr << "BankID Session: No response from server" << std::endl;
+        std::cerr << "Error: " << res.error() << std::endl;
+      }
+
       return std::unexpected(AuthError{
-          0,
+          403,
           BankIdErrorCode::INTERNAL_ERROR,
-          "No response from server"});
+          "SSL server verification failed"});
     }
 
     // Success case
@@ -177,14 +194,30 @@ namespace BankID
       {
         // Validate that it's valid JSON
         auto jsonBody = nlohmann::json::parse(res->body);
-        // Return the raw JSON body as details for proper JSON response
-
-        // Map status codes to appropriate BankIdErrorCode
         BankIdErrorCode errorCode;
         switch (res->status)
         {
         case 400:
-          errorCode = BankIdErrorCode::INVALID_PARAMETERS;
+          if (jsonBody.contains("errorCode"))
+          {
+            std::string errorCodeStr = jsonBody["errorCode"];
+            if (errorCodeStr == "alreadyInProgress")
+            {
+              errorCode = BankIdErrorCode::ALREADY_IN_PROGRESS;
+            }
+            else if (errorCodeStr == "invalidParameters")
+            {
+              errorCode = BankIdErrorCode::INVALID_PARAMETERS;
+            }
+            else
+            {
+              errorCode = BankIdErrorCode::INTERNAL_ERROR;
+            }
+          }
+          else
+          {
+            errorCode = BankIdErrorCode::INVALID_PARAMETERS;
+          }
           break;
         case 401:
         case 403:
@@ -220,7 +253,6 @@ namespace BankID
       }
       catch (const std::exception &e)
       {
-        // If JSON parsing fails, return the raw body anyway (might be plain text error)
         BankIdErrorCode errorCode;
         switch (res->status)
         {

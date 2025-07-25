@@ -99,12 +99,23 @@ namespace BankID::API
 
     AuthConfig &setAppConfig(const BankID::AppConfig &appConfig)
     {
+      // Check so no WebConfig is set if AppConfig is used
+      if (m_webConfig.has_value())
+      {
+        throw std::invalid_argument("Cannot set AppConfig when WebConfig is already set");
+      }
       m_appConfig = appConfig;
+
       return *this;
     }
 
     AuthConfig &setWebConfig(const BankID::WebConfig &webConfig)
     {
+      // Check so no WebConfig is set if AppConfig is used
+      if (m_appConfig.has_value())
+      {
+        throw std::invalid_argument("Cannot set WebConfig when AppConfig is already set");
+      }
       m_webConfig = webConfig;
       return *this;
     }

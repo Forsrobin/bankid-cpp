@@ -11,6 +11,7 @@ include_directories(${CMAKE_SOURCE_DIR}/bankid/includes)
 # Test executable
 add_executable(bankid_tests
     test_main.cpp
+    test_ssl.cpp
     test_auth.cpp
     # test_sign.cpp
     # test_payment.cpp

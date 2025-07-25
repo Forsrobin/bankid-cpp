@@ -92,9 +92,9 @@ namespace BankID
   struct BANKID_API SSLConfig
   {
     Environment environment = Environment::TEST;
-    std::string caFilePath = "certs/test.ca";          // Will be set based on environment
-    std::string pemCertPath = "certs/bankid_cert.pem"; // PEM certificate for Crow
-    std::string pemKeyPath = "certs/bankid_key.pem";   // PEM private key for Crow
+    std::string caFilePath = "certs/test.ca"; // Will be set based on environment
+    std::string pemCertPath;                  // PEM certificate for Crow
+    std::string pemKeyPath;                   // PEM private key for Crow
 
     /**
      * Constructor for SSLConfig
@@ -108,19 +108,25 @@ namespace BankID
      *
      * The .ca file is used for server verification and are provided by BankID so no need to generate it.
      */
-    SSLConfig(Environment env = Environment::TEST,
-              const std::string &_pemCertPath = "certs/bankid_cert.pem",
-              const std::string &_pemKeyPath = "certs/bankid_key.pem")
-        : environment(env), pemCertPath(_pemCertPath), pemKeyPath(_pemKeyPath)
+    SSLConfig(Environment env)
+        : environment(env)
     {
       if (environment == Environment::TEST)
       {
         caFilePath = "certs/test.ca";
+        pemCertPath = "certs/bankid_cert.pem";
+        pemKeyPath = "certs/bankid_key.pem";
       }
       else
       {
         caFilePath = "certs/production.ca";
       }
+    }
+
+    SSLConfig(Environment env, const std::string &caFilePath,
+              const std::string &pemCertPath, const std::string &pemKeyPath)
+        : environment(env), caFilePath(caFilePath), pemCertPath(pemCertPath), pemKeyPath(pemKeyPath)
+    {
     }
 
     /**
@@ -129,24 +135,21 @@ namespace BankID
      * @brief Checks if the certificate and key files exist and are accessible.
      * If any of the files do not exist, it returns false and prints an error message.
      */
-    bool validate() const
+    std::expected<bool, std::string> validate() const
     {
       // Verify certificate files exist
       if (!file_exists(this->pemCertPath))
       {
-        std::cerr << "Certificate file does not exist: " << this->pemCertPath << std::endl;
-        return false;
+        return std::unexpected("Certificate file does not exist: " + this->pemCertPath);
       }
 
       if (!file_exists(this->pemKeyPath))
       {
-        std::cerr << "Key file does not exist: " << this->pemKeyPath << std::endl;
-        return false;
+        return std::unexpected("Key file does not exist: " + this->pemKeyPath);
       }
       if (!file_exists(this->caFilePath))
       {
-        std::cerr << "CA file does not exist: " << this->caFilePath << std::endl;
-        return false;
+        return std::unexpected("CA file does not exist: " + this->caFilePath);
       }
 
       return true;
@@ -182,9 +185,10 @@ namespace BankID
     SSLConfig m_sslConfig;
     httplib::SSLClient *m_cli;
     bool m_initialized;
+    const bool m_showDebugLog;
 
   public:
-    Session(const SSLConfig &sslConfig);
+    Session(const SSLConfig &sslConfig, const bool showDebugLog = false);
     ~Session();
 
     /**

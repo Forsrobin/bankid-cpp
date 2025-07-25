@@ -27,8 +27,7 @@ A comprehensive C++ library and REST API server for BankID authentication, built
 
 This project provides a comprehensive **BankID C++ library** that implements the complete BankID API for authentication, signing, and payment operations. The library is designed for easy integration into your own applications and includes a simple HTTP server example to demonstrate its usage.
 
-> [!NOTE]
-> **Focus**: The primary goal is to provide a robust, production-ready BankID library. The included server is just a demonstration example.
+> [!NOTE] > **Focus**: The primary goal is to provide a robust, production-ready BankID library. The included server is just a demonstration example.
 
 ### Key Features
 
@@ -41,8 +40,7 @@ This project provides a comprehensive **BankID C++ library** that implements the
 - **SSL/TLS Support**: OpenSSL integration for secure communication
 - **Example HTTP Server**: Demo server built with CrowCpp to showcase library usage
 
-> [!WARNING]
-> **Important**: To test the library or demo server, you will need a **BankID test account** and valid test certificates from BankID.
+> [!WARNING] > **Important**: To test the library or demo server, you will need a **BankID test account** and valid test certificates from BankID.
 
 ## Project Structure
 
@@ -167,6 +165,7 @@ cd build/vs2022-deb-shared/server/Debug && ./bankid_server.exe
 #### VS Code Integration
 
 Use the provided VS Code tasks:
+
 - `Ctrl+Shift+P` → "Tasks: Run Task" → "Run Server (Static)"
 - `Ctrl+Shift+P` → "Tasks: Run Task" → "Run Server (Shared)"
 
@@ -179,8 +178,7 @@ cmake --install build/vs2022-deb --config Debug
 
 ## API Endpoints
 
-> [!IMPORTANT]
-> **Demo Server Only**: These HTTP endpoints are provided by the example server for demonstration. In your own application, you'll use the C++ library functions directly.
+> [!IMPORTANT] > **Demo Server Only**: These HTTP endpoints are provided by the example server for demonstration. In your own application, you'll use the C++ library functions directly.
 
 The example HTTP server provides the following endpoints:
 
@@ -189,11 +187,13 @@ The example HTTP server provides the following endpoints:
 Initiates a new BankID authentication session.
 
 **Request:**
+
 ```http
 GET http://localhost:8080/init
 ```
 
 **Response:**
+
 ```json
 {
   "status": "success",
@@ -207,14 +207,16 @@ GET http://localhost:8080/init
 Checks the status of the current authentication session.
 
 **Request:**
+
 ```http
 GET http://localhost:8080/poll
 ```
 
 **Response:**
+
 ```json
 {
-  "status": "success", 
+  "status": "success",
   "token": "auth_token_1753129021044",
   "auth_status": "COMPLETED"
 }
@@ -239,8 +241,7 @@ GET http://localhost:8080/poll
 
 ## Code Examples
 
-> [!TIP]
-> **Integration Focus**: These examples show how to integrate the BankID library into **your own application**. This is the primary use case for this library.
+> [!TIP] > **Integration Focus**: These examples show how to integrate the BankID library into **your own application**. This is the primary use case for this library.
 
 ### Integrating into Your CMake Project
 
@@ -259,12 +260,15 @@ target_link_libraries(your_target PRIVATE BankID::bankid_lib)
 #include "bankid.h"
 
 // Configure SSL for test environment
-BankID::SSLConfig sslConfig(BankID::Environment::TEST, 
-                           "certs/bankid_cert.pem", 
+BankID::SSLConfig sslConfig(BankID::Environment::TEST,
+                           "certs/bankid_cert.pem",
                            "certs/bankid_key.pem");
 
+// Enable/disable debug logging
+const bool showDebug = true;
+
 // Create session
-BankID::Session session(sslConfig);
+BankID::Session session(sslConfig, showDebug);
 
 // Initialize the session
 if (!session.initialize()) {
@@ -277,12 +281,12 @@ BankID::API::AuthConfig authConfig("192.168.1.1"); // End user IP
 auto authResult = session.auth(authConfig);
 
 if (authResult.has_value()) {
-    std::cout << "Authentication started. Order ref: " 
+    std::cout << "Authentication started. Order ref: "
               << authResult->orderRef << std::endl;
-    
+
     // Poll for completion
     BankID::API::CollectConfig collectConfig(authResult->orderRef);
-    
+
     while (true) {
         auto collectResult = session.collect(collectConfig);
         if (collectResult.has_value()) {
@@ -333,8 +337,7 @@ if (signResult.has_value()) {
 
 ## SSL Certificate Setup
 
-> [!CAUTION]
-> **Certificates Required**: BankID APIs require valid SSL certificates. You must obtain test certificates from BankID to use this library.
+> [!CAUTION] > **Certificates Required**: BankID APIs require valid SSL certificates. You must obtain test certificates from BankID to use this library.
 
 To use BankID APIs, you need SSL certificates in PEM format. BankID provides PKCS#12 (.p12) files that need to be converted.
 
@@ -362,13 +365,12 @@ server/certs/
 
 ```cpp
 // Test environment configuration
-BankID::SSLConfig testConfig(BankID::Environment::TEST, 
-                           "certs/bankid_cert.pem", 
-                           "certs/bankid_key.pem");
+BankID::SSLConfig testConfig(BankID::Environment::TEST);
 
 // Production environment configuration
-BankID::SSLConfig prodConfig(BankID::Environment::PRODUCTION, 
-                           "certs/bankid_cert.pem", 
+BankID::SSLConfig prodConfig(BankID::Environment::PRODUCTION,
+                           "certs/prod.ca",
+                           "certs/bankid_cert.pem",
                            "certs/bankid_key.pem");
 
 // Validate configuration
@@ -379,8 +381,7 @@ if (!testConfig.validate()) {
 
 ## QR Code Generation
 
-> [!NOTE]
-> **Automatic QR Handling**: The library includes built-in QR code generation that automatically updates every second for seamless user experience.
+> [!NOTE] > **Automatic QR Handling**: The library includes built-in QR code generation that automatically updates every second for seamless user experience.
 
 The library includes a built-in QR code generator for seamless user experience.
 
@@ -395,7 +396,7 @@ while (!qrGen.isExpired()) {
     auto qrCode = qrGen.getNextQRCode();
     if (qrCode.has_value()) {
         std::cout << "QR Code: " << qrCode.value() << std::endl;
-        
+
         // Display QR code to user and wait
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
@@ -431,18 +432,18 @@ auto authResult = session.auth(authConfig);
 if (authResult.has_value()) {
     // Add to QR cache
     auto& qrCache = BankID::QRGeneratorCache::instance();
-    qrCache.add(authResult->orderRef, 
-                authResult->qrStartToken, 
+    qrCache.add(authResult->orderRef,
+                authResult->qrStartToken,
                 authResult->qrStartSecret);
-    
+
     // Generate QR codes while polling
     BankID::API::CollectConfig collectConfig(authResult->orderRef);
     auto qrGenerator = qrCache.get(authResult->orderRef);
-    
+
     while (true) {
         // Check authentication status
         auto collectResult = session.collect(collectConfig);
-        
+
         // Generate new QR code
         if (qrGenerator && !qrGenerator->isExpired()) {
             auto qrCode = qrGenerator->getNextQRCode();
@@ -451,12 +452,12 @@ if (authResult.has_value()) {
                 displayQRCode(qrCode.value());
             }
         }
-        
+
         if (collectResult.has_value() && collectResult->status == "COMPLETED") {
             qrCache.remove(authResult->orderRef);
             break;
         }
-        
+
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
@@ -522,7 +523,7 @@ protected:
         sslConfig = BankID::SSLConfig(BankID::Environment::TEST);
         session = std::make_unique<BankID::Session>(sslConfig);
     }
-    
+
     BankID::SSLConfig sslConfig;
     std::unique_ptr<BankID::Session> session;
 };
@@ -539,48 +540,56 @@ The BankID library can be built and linked in two different ways:
 ### Static Library Linking
 
 **Advantages:**
+
 - Single executable file
 - No DLL dependencies
 - Easier deployment
 - Better performance (no DLL loading overhead)
 
 **Build Command:**
+
 ```bash
 cmake --preset vs2022-deb
 cmake --build build/vs2022-deb --config Debug
 ```
 
 **Usage:**
+
 ```cpp
 // No special considerations needed
 #include "bankid.h"
 ```
 
 **Output Files:**
+
 - `bankid.lib` - Static library file
 - `bankid_server.exe` - Standalone executable
 
 ### Dynamic Library (DLL) Linking
 
 **Advantages:**
+
 - Smaller executable size
 - Shared library can be updated independently
 - Memory sharing between multiple applications
 - Modular architecture
 
 **Build Command:**
+
 ```bash
 cmake --preset vs2022-deb-shared
 cmake --build build/vs2022-deb-shared --config Debug
 ```
 
 **Usage:**
+
 ```cpp
 // Same API, but requires DLL at runtime
 #include "bankid.h"
 ```
 
 **Output Files:**
+
 - `bankid.dll` - Dynamic library
 - `bankid.lib` - Import library for linking
 - `bankid.exp` - Export file
@@ -632,13 +641,15 @@ add_custom_command(TARGET your_app POST_BUILD
 
 1. **Test Certificates Only**: The certificates included in this repository (`server/certs/`) are **TEST CERTIFICATES ONLY** for educational and development purposes.
 
-2. **Production Security**: 
+2. **Production Security**:
+
    - Always use environment variables or secure key management systems for production certificates
    - Store certificates outside the source code repository
    - Use proper file permissions (600 for private keys)
    - Regularly rotate certificates
 
 3. **GitIgnore Configuration**: Add to your `.gitignore`:
+
    ```gitignore
    # Certificate files
    *.p12
@@ -651,16 +662,18 @@ add_custom_command(TARGET your_app POST_BUILD
    ```
 
 4. **Environment-based Configuration**:
+
    ```cpp
    // Use environment variables for certificate paths
+   const char* caPath = std::getenv("BANKID_CA_PATH");
    const char* certPath = std::getenv("BANKID_CERT_PATH");
    const char* keyPath = std::getenv("BANKID_KEY_PATH");
-   
-   if (!certPath || !keyPath) {
+
+   if (!caPath || !certPath || !keyPath) {
        throw std::runtime_error("Certificate paths not configured");
    }
-   
-   BankID::SSLConfig config(BankID::Environment::PRODUCTION, certPath, keyPath);
+
+   BankID::SSLConfig config(BankID::Environment::PRODUCTION, caPath, certPath, keyPath);
    ```
 
 5. **Certificate Validation**: Always validate certificates before use:
@@ -673,11 +686,13 @@ add_custom_command(TARGET your_app POST_BUILD
 ### What's Safe to Commit
 
 ✅ **Safe to commit:**
+
 - CA files provided by BankID (`test.ca`, `prod.ca`)
 - Configuration templates
 - Documentation
 
 ❌ **NEVER commit:**
+
 - Private keys (`.key`, `.pem` private keys)
 - Client certificates (`.p12`, `.crt`, `.pem` certificates)
 - Production configuration with real paths
@@ -690,27 +705,30 @@ We welcome contributions to improve the BankID C++ library! Here's how you can h
 ### Development Setup
 
 1. **Fork the Repository**
+
    ```bash
    git fork https://github.com/Forsrobin/bankid-cpp.git
    cd bankid-cpp
    ```
 
 2. **Setup Development Environment**
+
    ```bash
    # Create Python virtual environment
    python -m venv conan_venv
    source conan_venv/Scripts/activate  # Windows Git Bash
    pip install conan>=2.0
-   
+
    # Install dependencies
    conan install . -s build_type=Debug -of=conan/debug --build=missing
    ```
 
 3. **Build and Test**
+
    ```bash
    cmake --preset vs2022-deb
    cmake --build build/vs2022-deb --config Debug
-   
+
    # Run tests to ensure everything works
    build/vs2022-deb/tests/Debug/bankid_tests.exe
    ```
@@ -718,20 +736,23 @@ We welcome contributions to improve the BankID C++ library! Here's how you can h
 #### Pull Request Process
 
 1. **Create Feature Branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 2. **Make Changes**
+
    - Write clear, well-documented code
    - Add unit tests for new functionality
    - Update documentation as needed
 
 3. **Test Your Changes**
+
    ```bash
    # Run all tests
    build/vs2022-deb/tests/Debug/bankid_tests.exe
-   
+
    # Test both static and shared builds
    cmake --preset vs2022-deb-shared
    cmake --build build/vs2022-deb-shared --config Debug
@@ -755,6 +776,7 @@ We welcome contributions to improve the BankID C++ library! Here's how you can h
 #### Issue Reporting
 
 When reporting issues, please include:
+
 - **Environment**: OS, compiler version, CMake version
 - **Build Configuration**: Static/shared, Debug/Release
 - **Reproduction Steps**: Clear steps to reproduce the issue

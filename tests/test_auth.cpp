@@ -6,138 +6,325 @@
 
 class AuthTest : public ::testing::Test
 {
-protected:
-  void SetUp() override
+public:
+  AuthTest()
+      : sslConfig(BankID::Environment::TEST),
+        session(std::make_unique<BankID::Session>(sslConfig))
   {
-    // Setup SSL config for testing
-    sslConfig = BankID::SSLConfig(BankID::Environment::TEST);
-
-    // Create session
-    session = std::make_unique<BankID::Session>(sslConfig);
   }
 
+protected:
   void TearDown() override
   {
     session.reset();
+  }
+
+  void CancelOrder(std::string orderRef)
+  {
+    BankID::API::CancelConfig cancelConfig(orderRef);
+    auto cancelResponse = session->cancel(cancelConfig);
+    EXPECT_TRUE(cancelResponse.has_value());
+    EXPECT_EQ(cancelResponse.value().httpStatus, 200);
   }
 
   BankID::SSLConfig sslConfig;
   std::unique_ptr<BankID::Session> session;
 };
 
-TEST_F(AuthTest, CreateAuthConfigWithPersonalNumber)
+TEST_F(AuthTest, ConfigParamaters)
 {
   BankID::API::AuthConfig config("192.168.1.1");
 
   BankID::Requirement requirement;
-  requirement.personalNumber = "190000000000";
-  config.setRequirement(requirement);
 
   EXPECT_EQ(config.getEndUserIp(), "192.168.1.1");
-  EXPECT_TRUE(config.getRequirement().has_value());
-  EXPECT_EQ(config.getRequirement().value().personalNumber.value(), "190000000000");
+  EXPECT_FALSE(config.getAppConfig().has_value());
+  EXPECT_FALSE(config.getWebConfig().has_value());
+  EXPECT_FALSE(config.getReturnUrl().has_value());
+
+  // Create AppConfig
+  BankID::AppConfig appConfig;
+  appConfig.appIdentifier = "com.example.app";
+  appConfig.deviceOS = "Android";
+  appConfig.deviceIdentifier = "device123";
+
+  // Set AppConfig
+  config.setAppConfig(appConfig);
+  EXPECT_TRUE(config.getAppConfig().has_value());
+
+  EXPECT_FALSE(config.getAppConfig()->deviceModelName.length() > 0);
+
+  appConfig.deviceModelName = "Pixel 5";
+  EXPECT_NE(config.getAppConfig()->deviceModelName, "Pixel 5");
+  EXPECT_EQ(appConfig.deviceModelName, "Pixel 5");
+
+  // Create webConfig
+  BankID::WebConfig webConfig;
+  webConfig.deviceIdentifier = "webDevice123";
+  webConfig.referringDomain = "example.com";
+  webConfig.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
+
+  EXPECT_THROW(config.setWebConfig(webConfig), std::invalid_argument);
 }
 
-TEST_F(AuthTest, CreateAuthConfigWithoutPersonalNumber)
+TEST_F(AuthTest, AppStartedAuthentication)
 {
-  BankID::API::AuthConfig config("192.168.1.1");
+  BankID::API::AuthConfig config("127.0.0.1");
 
-  EXPECT_EQ(config.getEndUserIp(), "192.168.1.1");
-  EXPECT_FALSE(config.getRequirement().has_value());
-}
+  // Create the appConfig
+  BankID::AppConfig appConfig;
+  appConfig.appIdentifier = "com.opsynk.com";
+  appConfig.deviceOS = "IOS 14.4";
+  appConfig.deviceModelName = "iPhone 12";
+  appConfig.deviceIdentifier = "device123";
 
-TEST_F(AuthTest, CreateAuthConfigWithRequirement)
-{
-  BankID::API::AuthConfig config("192.168.1.1");
+  config.setAppConfig(appConfig);
 
-  BankID::Requirement requirement;
-  requirement.cardReader = "class1";
-  requirement.certificatePolicies = {"1.2.752.78.1.1", "1.2.752.78.1.2"};
-  config.setRequirement(requirement);
+  EXPECT_TRUE(config.getAppConfig().has_value());
+  EXPECT_TRUE(config.getAppConfig()->deviceModelName == "iPhone 12");
 
-  EXPECT_EQ(config.getEndUserIp(), "192.168.1.1");
-  EXPECT_TRUE(config.getRequirement().has_value());
-  EXPECT_EQ(config.getRequirement().value().cardReader.value(), "class1");
-  EXPECT_EQ(config.getRequirement().value().certificatePolicies.value().size(), 2);
-}
+  EXPECT_TRUE(config.getEndUserIp() == "127.0.0.1");
 
-TEST_F(AuthTest, CreateAuthConfigWithUserVisibleData)
-{
-  BankID::API::AuthConfig config("192.168.1.1");
-  config.setUserVisibleData("VGVzdCBkYXRh") // Base64 encoded "Test data"
-      .setUserVisibleDataFormat("simpleMarkdownV1");
+  EXPECT_FALSE(config.getReturnUrl().has_value());
+  EXPECT_FALSE(config.getUserVisibleData().has_value());
+  EXPECT_FALSE(config.getReturnRisk().has_value());
 
-  EXPECT_EQ(config.getEndUserIp(), "192.168.1.1");
+  // Set all the optional parameters
+  config.setReturnUrl("https://example.com/return")
+      .setUserVisibleData("IFRoaXMgaXMgYSBzYW1wbGUgdGV4dCB0byBiZSBzaWduZWQ=")
+      .setReturnRisk(true);
+
+  EXPECT_TRUE(config.getReturnUrl().has_value());
+  EXPECT_EQ(config.getReturnUrl().value(), "https://example.com/return");
   EXPECT_TRUE(config.getUserVisibleData().has_value());
-  EXPECT_EQ(config.getUserVisibleData().value(), "VGVzdCBkYXRh");
-  EXPECT_TRUE(config.getUserVisibleDataFormat().has_value());
-  EXPECT_EQ(config.getUserVisibleDataFormat().value(), "simpleMarkdownV1");
+  EXPECT_TRUE(config.getReturnRisk().has_value());
+  EXPECT_EQ(config.getUserVisibleData().value(), "IFRoaXMgaXMgYSBzYW1wbGUgdGV4dCB0byBiZSBzaWduZWQ=");
+  EXPECT_EQ(config.getReturnRisk().value(), true);
+
+  // Make the API call
+  auto response = session->auth(config);
+
+  EXPECT_TRUE(response.has_value());
+
+  // Check the response
+  const auto &orderResponse = response.value();
+  EXPECT_EQ(orderResponse.httpStatus, 200);
+  EXPECT_FALSE(orderResponse.orderRef.empty());
+  EXPECT_FALSE(orderResponse.autoStartToken.empty());
+  EXPECT_FALSE(orderResponse.qrStartToken.empty());
+  EXPECT_FALSE(orderResponse.qrStartSecret.empty());
+
+  // Cancel the order
+  CancelOrder(orderResponse.orderRef);
 }
 
-TEST_F(AuthTest, ValidateEndUserIpRequired)
+TEST_F(AuthTest, WebStartedAuthentication)
 {
-  BankID::API::AuthConfig config1("192.168.1.1");
-  EXPECT_EQ(config1.getEndUserIp(), "192.168.1.1");
+  BankID::API::AuthConfig config("127.0.0.1");
 
-  BankID::API::AuthConfig config2("");
-  EXPECT_TRUE(config2.getEndUserIp().empty());
+  // Create the webConfig
+  BankID::WebConfig webConfig;
+  webConfig.deviceIdentifier = "f1e3813ab36f114d4b0c2b3636617511467adb353ce8e5ae6c83500d932f2269";
+  webConfig.referringDomain = "example.com";
+  webConfig.userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
+
+  EXPECT_NO_THROW(config.setWebConfig(webConfig));
+
+  // Create the appConfig
+  BankID::AppConfig appConfig;
+  appConfig.appIdentifier = "com.opsynk.com";
+  appConfig.deviceOS = "IOS 14.4";
+  appConfig.deviceModelName = "iPhone 12";
+  appConfig.deviceIdentifier = "device123";
+
+  EXPECT_THROW(config.setAppConfig(appConfig), std::invalid_argument);
+  EXPECT_FALSE(config.getAppConfig().has_value());
+
+  EXPECT_TRUE(config.getWebConfig().has_value());
+  EXPECT_TRUE(config.getWebConfig()->deviceIdentifier == "f1e3813ab36f114d4b0c2b3636617511467adb353ce8e5ae6c83500d932f2269");
+  EXPECT_TRUE(config.getWebConfig()->referringDomain == "example.com");
+  EXPECT_TRUE(config.getWebConfig()->userAgent == "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3");
+
+  EXPECT_FALSE(config.getReturnUrl().has_value());
+  EXPECT_FALSE(config.getUserVisibleData().has_value());
+  EXPECT_FALSE(config.getReturnRisk().has_value());
+
+  // Set all the optional parameters
+  config.setReturnUrl("https://example.com/return")
+      .setUserVisibleData("IFRoaXMgaXMgYSBzYW1wbGUgdGV4dCB0byBiZSBzaWduZWQ=")
+      .setReturnRisk(false);
+
+  EXPECT_TRUE(config.getReturnUrl().has_value());
+  EXPECT_EQ(config.getReturnUrl().value(), "https://example.com/return");
+  EXPECT_TRUE(config.getUserVisibleData().has_value());
+  EXPECT_TRUE(config.getReturnRisk().has_value());
+  EXPECT_EQ(config.getUserVisibleData().value(), "IFRoaXMgaXMgYSBzYW1wbGUgdGV4dCB0byBiZSBzaWduZWQ=");
+  EXPECT_EQ(config.getReturnRisk().value(), false);
+
+  // Make the API call
+  auto response = session->auth(config);
+
+  EXPECT_TRUE(response.has_value());
+
+  // Check the response
+  const auto &orderResponse = response.value();
+  EXPECT_EQ(orderResponse.httpStatus, 200);
+  EXPECT_FALSE(orderResponse.orderRef.empty());
+  EXPECT_FALSE(orderResponse.autoStartToken.empty());
+  EXPECT_FALSE(orderResponse.qrStartToken.empty());
+  EXPECT_FALSE(orderResponse.qrStartSecret.empty());
+
+  CancelOrder(orderResponse.orderRef);
 }
 
-TEST_F(AuthTest, AuthWithInvalidSSLConfig)
+TEST_F(AuthTest, PersonalNumberRequirementsAuthentication)
 {
-  BankID::SSLConfig invalidConfig(BankID::Environment::TEST, "invalid_cert.pem", "invalid_key.pem");
+  BankID::API::AuthConfig config("127.0.0.1");
 
-  EXPECT_FALSE(invalidConfig.validate());
-
-  BankID::Session invalidSession(invalidConfig);
-  EXPECT_FALSE(invalidSession.isInitialized());
-
-  BankID::API::AuthConfig config("192.168.1.1");
-
-  auto result = invalidSession.auth(config);
-  EXPECT_EQ(result.has_value(), 0);
-}
-
-TEST_F(AuthTest, AuthWithValidConfig)
-{
-  BankID::API::AuthConfig config("192.168.1.1");
-
+  // Requirements
   BankID::Requirement requirement;
-  requirement.personalNumber = "190000000000"; // Test personal number
+  requirement.personalNumber = "200003121145";
+
+  EXPECT_NO_THROW(config.setRequirement(requirement));
+  EXPECT_TRUE(config.getRequirement().has_value());
+  EXPECT_EQ(config.getRequirement()->personalNumber, "200003121145");
+  EXPECT_FALSE(config.getRequirement()->cardReader.has_value());
+
+  // Set all the optional parameters
+  config.setReturnUrl("https://example.com/return")
+      .setUserVisibleData("IFRoaXMgaXMgYSBzYW1wbGUgdGV4dCB0byBiZSBzaWduZWQ=");
+
+  EXPECT_TRUE(config.getReturnUrl().has_value());
+  EXPECT_EQ(config.getReturnUrl().value(), "https://example.com/return");
+  EXPECT_TRUE(config.getUserVisibleData().has_value());
+  EXPECT_EQ(config.getUserVisibleData().value(), "IFRoaXMgaXMgYSBzYW1wbGUgdGV4dCB0byBiZSBzaWduZWQ=");
+
+  // Make the API call
+  auto response = session->auth(config);
+
+  EXPECT_TRUE(response.has_value());
+
+  // Check the response
+  const auto &orderResponse = response.value();
+  EXPECT_EQ(orderResponse.httpStatus, 200);
+  EXPECT_FALSE(orderResponse.orderRef.empty());
+  EXPECT_FALSE(orderResponse.autoStartToken.empty());
+  EXPECT_FALSE(orderResponse.qrStartToken.empty());
+  EXPECT_FALSE(orderResponse.qrStartSecret.empty());
+
+  CancelOrder(orderResponse.orderRef);
+}
+
+TEST_F(AuthTest, SimpleAuthentication)
+{
+  BankID::API::AuthConfig config("127.0.0.1");
+
+  EXPECT_TRUE(config.getReturnUrl().value_or("").empty());
+  EXPECT_TRUE(config.getUserVisibleData().value_or("").empty());
+
+  // Make the API call
+  auto response = session->auth(config);
+
+  EXPECT_TRUE(response.has_value());
+
+  // Check the response
+  const auto &orderResponse = response.value();
+  EXPECT_EQ(orderResponse.httpStatus, 200);
+  EXPECT_FALSE(orderResponse.orderRef.empty());
+  EXPECT_FALSE(orderResponse.autoStartToken.empty());
+  EXPECT_FALSE(orderResponse.qrStartToken.empty());
+  EXPECT_FALSE(orderResponse.qrStartSecret.empty());
+
+  CancelOrder(orderResponse.orderRef);
+}
+
+TEST_F(AuthTest, AuthenticationInvalidEnduserIp)
+{
+  BankID::API::AuthConfig config("");
+
+  EXPECT_TRUE(config.getReturnUrl().value_or("").empty());
+  EXPECT_TRUE(config.getUserVisibleData().value_or("").empty());
+
+  // Make the API call
+  auto response = session->auth(config);
+
+  EXPECT_FALSE(response.has_value());
+
+  if (!response.has_value())
+  {
+    EXPECT_EQ(response.error().details, R"({"errorCode":"invalidParameters","details":"Invalid endUserIp"})");
+    EXPECT_EQ(response.error().errorCode, BankID::BankIdErrorCode::INVALID_PARAMETERS);
+    EXPECT_EQ(response.error().httpStatus, 400);
+  }
+}
+
+TEST_F(AuthTest, AuthenticationInvalidParameters)
+{
+  BankID::API::AuthConfig config("127.0.0.1");
+
+  // Create requirement with invalid personal number
+  BankID::Requirement requirement;
+  requirement.personalNumber = "invalid_personal_number";
+
   config.setRequirement(requirement);
 
-  auto result = session->auth(config);
-
-  if (result.has_value())
+  // Make the API call
+  auto response = session->auth(config);
+  EXPECT_FALSE(response.has_value());
+  if (!response.has_value())
   {
-    EXPECT_FALSE(result.value().orderRef.empty());
-    EXPECT_FALSE(result.value().autoStartToken.empty());
+    EXPECT_EQ(response.error().details, R"({"errorCode":"invalidParameters","details":"Incorrect personalNumber"})");
+    EXPECT_EQ(response.error().errorCode, BankID::BankIdErrorCode::INVALID_PARAMETERS);
+    EXPECT_EQ(response.error().httpStatus, 400);
+  }
+
+  requirement.personalNumber = "200003121145"; // Valid personal number
+  requirement.cardReader = "some_invalid_card_reader";
+  config.setRequirement(requirement);
+
+  // Make the API call
+  response = session->auth(config);
+  EXPECT_FALSE(response.has_value());
+  if (!response.has_value())
+  {
+    EXPECT_EQ(response.error().details, R"({"errorCode":"invalidParameters","details":"Invalid requirement"})");
+    EXPECT_EQ(response.error().errorCode, BankID::BankIdErrorCode::INVALID_PARAMETERS);
+    EXPECT_EQ(response.error().httpStatus, 400);
   }
 }
 
-TEST_F(AuthTest, AuthQRCodeFlow)
+// Invalid parameters test
+TEST_F(AuthTest, PersonalNumberAuthenticationAlreadyInProgress)
 {
-  BankID::API::AuthConfig config("192.168.1.1");
 
-  auto result = session->auth(config);
+  BankID::API::AuthConfig config("127.0.0.1");
 
-  if (result.has_value())
+  BankID::Requirement requirement;
+  requirement.personalNumber = "200003121145";
+
+  config.setRequirement(requirement);
+
+  // Make the API call
+  auto response = session->auth(config);
+
+  EXPECT_TRUE(response.has_value());
+
+  const auto &orderResponse = response.value();
+  EXPECT_EQ(orderResponse.httpStatus, 200);
+  EXPECT_FALSE(orderResponse.orderRef.empty());
+  EXPECT_FALSE(orderResponse.autoStartToken.empty());
+  EXPECT_FALSE(orderResponse.qrStartToken.empty());
+  EXPECT_FALSE(orderResponse.qrStartSecret.empty());
+
+  // Make the same API call again to trigger ALREADY_IN_PROGRESS error
+  response = session->auth(config);
+
+  EXPECT_FALSE(response.has_value());
+
+  if (!response.has_value())
   {
-    EXPECT_FALSE(result.value().orderRef.empty());
-    EXPECT_FALSE(result.value().qrStartToken.empty());
-  }
-}
-
-TEST_F(AuthTest, AuthWithUserVisibleData)
-{
-  BankID::API::AuthConfig config("192.168.1.1");
-  config.setUserVisibleData("VGVzdCBkYXRh") // Base64 encoded "Test data"
-      .setUserVisibleDataFormat("simpleMarkdownV1");
-
-  auto result = session->auth(config);
-
-  if (result.has_value())
-  {
-    EXPECT_FALSE(result.value().orderRef.empty());
+    EXPECT_EQ(response.error().details, R"({"errorCode":"alreadyInProgress","details":"Order already in progress for pno"})");
+    EXPECT_EQ(response.error().errorCode, BankID::BankIdErrorCode::ALREADY_IN_PROGRESS);
+    EXPECT_EQ(response.error().httpStatus, 400);
   }
 }

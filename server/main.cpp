@@ -36,13 +36,18 @@ int main()
   // SSL Configuration for BankID
   BankID::SSLConfig sslConfig(
       BankID::Environment::TEST,
+      "certs/test.ca",
       "certs/bankid_cert.pem",
       "certs/bankid_key.pem");
 
-  if (!sslConfig.validate())
+  
+  const auto& validationResult = sslConfig.validate();
+  if (!validationResult.has_value())
   {
+    std::cerr << "SSL configuration validation failed: " << validationResult.error() << std::endl;
     return 1;
   }
+
 
   // Create your BankID session instance with just SSL config
   BankID::Session bankidSession(sslConfig);

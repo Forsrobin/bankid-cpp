@@ -9,7 +9,6 @@
 namespace BankID::API
 {
 
-
   enum BANKID_API CurrencyCode
   {
     EUR, // Euro
@@ -19,18 +18,25 @@ namespace BankID::API
     DKK, // Danish Krone
     GBP  // British Pound
   };
-  
+
   inline std::string currencyToString(CurrencyCode code)
   {
     switch (code)
     {
-    case EUR: return "EUR";
-    case USD: return "USD";
-    case SEK: return "SEK";
-    case NOK: return "NOK";
-    case DKK: return "DKK";
-    case GBP: return "GBP";
-    default: return "UNKNOWN";
+    case EUR:
+      return "EUR";
+    case USD:
+      return "USD";
+    case SEK:
+      return "SEK";
+    case NOK:
+      return "NOK";
+    case DKK:
+      return "DKK";
+    case GBP:
+      return "GBP";
+    default:
+      return "UNKNOWN";
     }
   }
   /**
@@ -43,7 +49,7 @@ namespace BankID::API
 
   struct BANKID_API PaymentMoney
   {
-    std::string amount;   // Required, max 48 chars, e.g. "100,00"
+    std::string amount;    // Required, max 48 chars, e.g. "100,00"
     CurrencyCode currency; // Required, 3 chars, ISO 4217, e.g. "EUR"
   };
 
@@ -181,12 +187,21 @@ namespace BankID::API
 
     PaymentConfig &setAppConfig(const BankID::AppConfig &appConfig)
     {
+      if (m_webConfig.has_value())
+      {
+        throw std::invalid_argument("Cannot set AppConfig when WebConfig is already set");
+      }
       m_appConfig = appConfig;
       return *this;
     }
 
     PaymentConfig &setWebConfig(const BankID::WebConfig &webConfig)
     {
+      // Check so no WebConfig is set if AppConfig is used
+      if (m_appConfig.has_value())
+      {
+        throw std::invalid_argument("Cannot set WebConfig when AppConfig is already set");
+      }
       m_webConfig = webConfig;
       return *this;
     }
