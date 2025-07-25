@@ -2,7 +2,7 @@
   "version": 2,
   "configurePresets": [
     {
-      "name": "conan-dev",
+      "name": "conan-deb-dev",
       "hidden": true,
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/conan/debug/build/generators/conan_toolchain.cmake"
@@ -86,7 +86,7 @@
       "name": "unix-rel",
       "displayName": "Unix Make Release",
       "binaryDir": "${sourceDir}/build/unix-rel",
-      "inherits": ["unix-make", "rel"],
+      "inherits": ["unix-make", "rel", "conan-deb-real"],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-rel/install"
       }
@@ -95,7 +95,7 @@
       "name": "unix-rel-ninja",
       "displayName": "Unix Ninja Clang Release",
       "binaryDir": "${sourceDir}/build/unix-rel-ninja",
-      "inherits": ["unix-ninja", "rel"],
+      "inherits": ["unix-ninja", "rel", "conan-deb-real"],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-rel-ninja/install"
       }
@@ -104,7 +104,7 @@
       "name": "unix-rel-shared",
       "displayName": "Unix Make Release Shared",
       "binaryDir": "${sourceDir}/build/unix-rel-shared",
-      "inherits": ["unix-shared", "unix-rel"],
+      "inherits": ["unix-shared", "unix-rel", "conan-deb-real"],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-rel-shared/install"
       }
@@ -113,7 +113,7 @@
       "name": "unix-deb",
       "displayName": "Unix Make Debug",
       "binaryDir": "${sourceDir}/build/unix-deb",
-      "inherits": ["unix-make", "deb", "conan-dev"],
+      "inherits": ["unix-make", "deb", "conan-deb-dev"],
       "cacheVariables": {
         "CMAKE_CXX_FLAGS": "-O0 --coverage -g -fsanitize=address",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-deb/install"
@@ -123,7 +123,7 @@
       "name": "unix-deb-ninja",
       "displayName": "Unix Ninja Clang Debug",
       "binaryDir": "${sourceDir}/build/unix-deb-ninja",
-      "inherits": ["unix-ninja", "deb", "conan-dev"],
+      "inherits": ["unix-ninja", "deb", "conan-deb-dev"],
       "cacheVariables": {
         "CMAKE_CXX_FLAGS": "-O0 --coverage -g -fsanitize=address",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-deb-ninja/install"
@@ -133,7 +133,7 @@
       "name": "unix-deb-shared",
       "displayName": "Unix Make Debug Shared",
       "binaryDir": "${sourceDir}/build/unix-deb-shared",
-      "inherits": ["unix-shared", "unix-deb"],
+      "inherits": ["unix-shared", "unix-deb", "conan-deb-dev"],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-deb-shared/install"
       }
@@ -151,7 +151,7 @@
       "name": "vs2022-deb",
       "displayName": "Visual Studio 2022 Debug",
       "binaryDir": "${sourceDir}/build/vs2022-deb",
-      "inherits": ["vs2022", "deb", "conan-dev"],
+      "inherits": ["vs2022", "deb", "conan-deb-dev"],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/vs2022-deb/install"
       }
@@ -169,7 +169,7 @@
       "name": "vs2022-deb-shared",
       "displayName": "Visual Studio 2022 Debug Shared",
       "binaryDir": "${sourceDir}/build/vs2022-deb-shared",
-      "inherits": ["vs2022-shared", "deb", "conan-dev"],
+      "inherits": ["vs2022-shared", "deb", "conan-deb-dev"],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/vs2022-rel/install"
       }
