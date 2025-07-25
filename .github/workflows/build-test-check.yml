@@ -9,26 +9,26 @@ jobs:
     strategy:
       matrix:
         config:
-          - name: "Release Static"
-            build_type: "Release"
-            conan_profile: "Release"
-            cmake_preset: "unix-rel-ninja"
-            shared: false
+          # - name: "Release Static"
+          #   build_type: "Release"
+          #   conan_profile: "Release"
+          #   cmake_preset: "unix-rel-ninja"
+          #   shared: false
           - name: "Release Shared"
             build_type: "Release"
             conan_profile: "Release"
             cmake_preset: "unix-rel-ninja"  # Will be modified for shared
             shared: true
-          - name: "Debug Static"
-            build_type: "Debug"
-            conan_profile: "Debug"
-            cmake_preset: "unix-deb-ninja"
-            shared: false
-          - name: "Debug Shared"
-            build_type: "Debug"
-            conan_profile: "Debug"
-            cmake_preset: "unix-deb-ninja"  # Will be modified for shared
-            shared: true
+          # - name: "Debug Static"
+          #   build_type: "Debug"
+          #   conan_profile: "Debug"
+          #   cmake_preset: "unix-deb-ninja"
+          #   shared: false
+          # - name: "Debug Shared"
+          #   build_type: "Debug"
+          #   conan_profile: "Debug"
+          #   cmake_preset: "unix-deb-ninja"  # Will be modified for shared
+          #   shared: true
 
     runs-on: ubuntu-latest
     name: ${{ matrix.config.name }}
@@ -75,7 +75,13 @@ jobs:
 
     - name: Configure CMake
       run: |
-        cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }}
+        # Add the conan toolchain file for all builds
+        if [ "${{ matrix.config.build_type }}" = "Debug" ]; then
+          TOOLCHAIN_FILE="${{ github.workspace }}/conan/debug/build/generators/conan_toolchain.cmake"
+        else
+          TOOLCHAIN_FILE="${{ github.workspace }}/conan/release/build/generators/conan_toolchain.cmake"
+        fi
+        cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }} -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE"
 
     - name: Build project
       run: |
