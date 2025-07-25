@@ -43,12 +43,7 @@ set_target_properties(bankid_tests PROPERTIES
 # Enable testing
 enable_testing()
 
-# Add test discovery - temporarily disabled to avoid DLL issues
-# include(GoogleTest)
-# gtest_discover_tests(bankid_tests)
-
 # Manual test registration as fallback
-add_test(NAME AuthTests COMMAND bankid_tests --gtest_filter=AuthTest.*)
 
 # Add custom test target
 add_custom_target(run_tests
@@ -99,3 +94,12 @@ add_custom_command(TARGET bankid_tests POST_BUILD
     COMMENT "Copying certificates folder to tests output directory"
     VERBATIM
 )
+
+add_test(NAME SSLConfigTest COMMAND bankid_tests --gtest_filter=SSLConfigTest.*)
+set_tests_properties(SSLConfigTest PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR:bankid_tests>)
+
+add_test(NAME AuthTests COMMAND bankid_tests --gtest_filter=AuthTest.*)
+set_tests_properties(AuthTests PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR:bankid_tests>)
+
+add_test(NAME SignTests COMMAND bankid_tests --gtest_filter=SignTest.*)
+set_tests_properties(SignTests PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR:bankid_tests>)
