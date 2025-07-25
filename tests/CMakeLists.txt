@@ -13,7 +13,7 @@ add_executable(bankid_tests
     test_main.cpp
     test_ssl.cpp
     test_auth.cpp
-    # test_sign.cpp
+    test_sign.cpp
     # test_payment.cpp
     # test_other_payment.cpp
     # test_phone_auth.cpp

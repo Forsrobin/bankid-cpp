@@ -79,6 +79,15 @@ namespace BankID
     MAINTENANCE,
   };
 
+  struct BANKID_API Base64
+  {
+    static std::string encode(const std::string &data)
+    {
+      std::string encoded = httplib::detail::base64_encode(data);
+      return encoded;
+    }
+  };
+
   /** SSL configuration structure
    * This structure contains the SSL configuration for the BankID API.
    * It includes the environment, CA file path, PEM certificate path, and PEM key path.
