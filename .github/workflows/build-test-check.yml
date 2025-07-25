@@ -82,7 +82,7 @@ jobs:
         run: |
           export PATH="/usr/bin:$PATH"
           EXTRA_CXX_FLAGS="-stdlib=libc++ -std=c++23"
-          cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }}  -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja -DCMAKE_CXX_STANDARD=23 -DCMAKE_CXX_FLAGS="-stdlib=libc++"
+          cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }}  -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja"
 
       - name: Build project
         run: |
