@@ -726,6 +726,9 @@ We welcome contributions to improve the BankID C++ library! Here's how you can h
 
    # Install dependencies
    conan install . -s build_type=Debug -of=conan/debug --build=missing
+
+   # For release build
+   conan install . -s build_type=Release -of=conan/release --build=missing
    ```
 
 3. **Build and Test**
