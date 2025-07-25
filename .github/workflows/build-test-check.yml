@@ -56,7 +56,7 @@ jobs:
       - name: Configure Conan
         run: |
           conan profile detect --force
-          conan prodile show
+          conan profile show
 
       - name: Install dependencies with Conan
         run: |
