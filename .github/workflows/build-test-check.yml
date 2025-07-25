@@ -45,7 +45,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y ninja-build ninja clang-17 clang++-17
+        sudo apt-get install -y ninja-build clang-17 clang++-17
 
     - name: Install Conan
       run: |
