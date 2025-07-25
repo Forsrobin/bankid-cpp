@@ -78,15 +78,8 @@ jobs:
 
     - name: Configure CMake
       run: |
-        # Add the conan toolchain file for all builds
-        if [ "${{ matrix.config.build_type }}" = "Debug" ]; then
-          TOOLCHAIN_FILE="${{ github.workspace }}/conan/debug/build/generators/conan_toolchain.cmake"
-        else
-          TOOLCHAIN_FILE="${{ github.workspace }}/conan/release/build/generators/conan_toolchain.cmake"
-        fi
-        # Ensure ninja is in PATH and set CMAKE_MAKE_PROGRAM explicitly
         export PATH="/usr/bin:$PATH"
-        cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }} -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja
+        cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }}  -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja
 
     - name: Build project
       run: |
