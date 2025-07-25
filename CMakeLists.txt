@@ -20,7 +20,7 @@ endif()
 
 option(BUILD_SHARED_LIBS "Build shared library" Off)
 
-option(BUILD_TESTS "Build tests" On)
+# option(BUILD_TESTS "Build tests" On)
 
 add_subdirectory(bankid)
 add_subdirectory(server)

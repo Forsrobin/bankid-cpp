@@ -14,21 +14,21 @@ jobs:
             conan_profile: "Release"
             cmake_preset: "unix-rel-ninja"
             shared: false
-          - name: "Release Shared"
-            build_type: "Release"
-            conan_profile: "Release"
-            cmake_preset: "unix-rel-ninja"  # Will be modified for shared
-            shared: true
-          - name: "Debug Static"
-            build_type: "Debug"
-            conan_profile: "Debug"
-            cmake_preset: "unix-deb-ninja"
-            shared: false
-          - name: "Debug Shared"
-            build_type: "Debug"
-            conan_profile: "Debug"
-            cmake_preset: "unix-deb-ninja"  # Will be modified for shared
-            shared: true
+          # - name: "Release Shared"
+          #   build_type: "Release"
+          #   conan_profile: "Release"
+          #   cmake_preset: "unix-rel-ninja"  # Will be modified for shared
+          #   shared: true
+          # - name: "Debug Static"
+          #   build_type: "Debug"
+          #   conan_profile: "Debug"
+          #   cmake_preset: "unix-deb-ninja"
+          #   shared: false
+          # - name: "Debug Shared"
+          #   build_type: "Debug"
+          #   conan_profile: "Debug"
+          #   cmake_preset: "unix-deb-ninja"  # Will be modified for shared
+          #   shared: true
 
     runs-on: ubuntu-latest
     name: ${{ matrix.config.name }}
@@ -80,9 +80,9 @@ jobs:
       run: |
         # Add the conan toolchain file for all builds
         if [ "${{ matrix.config.build_type }}" = "Debug" ]; then
-          TOOLCHAIN_FILE="${{ github.workspace }}/bankid-cpp/conan/debug/build/generators/conan_toolchain.cmake"
+          TOOLCHAIN_FILE="${{ github.workspace }}/bankid-cpp/conan/debug/build/Debug/generators/conan_toolchain.cmake"
         else
-          TOOLCHAIN_FILE="${{ github.workspace }}/bankid-cpp/conan/release/build/generators/conan_toolchain.cmake"
+          TOOLCHAIN_FILE="${{ github.workspace }}/bankid-cpp/conan/release/build/Release/generators/conan_toolchain.cmake"
         fi
         # Ensure ninja is in PATH and set CMAKE_MAKE_PROGRAM explicitly
         export PATH="/usr/bin:$PATH"

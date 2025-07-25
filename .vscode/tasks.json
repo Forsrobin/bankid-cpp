@@ -63,27 +63,5 @@
       "dependsOn": "Build Tests (Shared)",
       "problemMatcher": []
     },
-    {
-      "label": "Run Tests Release (Static)",
-      "type": "shell",
-      "command": "./bankid_tests.exe",
-      "options": {
-        "cwd": "${workspaceFolder}/build/vs2022-rel/tests/Release"
-      },
-      "group": "test",
-      "dependsOn": "Build Tests",
-      "problemMatcher": []
-    },
-    {
-      "label": "Run Tests Release (Shared)",
-      "type": "shell",
-      "command": "./bankid_tests.exe",
-      "options": {
-        "cwd": "${workspaceFolder}/build/vs2022-rel-shared/tests/Release"
-      },
-      "group": "test",
-      "dependsOn": "Build Tests (Shared)",
-      "problemMatcher": []
-    }
   ]
 }
