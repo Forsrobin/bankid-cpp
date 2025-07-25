@@ -80,9 +80,9 @@ jobs:
       run: |
         # Add the conan toolchain file for all builds
         if [ "${{ matrix.config.build_type }}" = "Debug" ]; then
-          TOOLCHAIN_FILE="${{ github.workspace }}/bankid-cpp/conan/debug/build/Debug/generators/conan_toolchain.cmake"
+          TOOLCHAIN_FILE="${{ github.workspace }}/conan/debug/build/generators/conan_toolchain.cmake"
         else
-          TOOLCHAIN_FILE="${{ github.workspace }}/bankid-cpp/conan/release/build/Release/generators/conan_toolchain.cmake"
+          TOOLCHAIN_FILE="${{ github.workspace }}/conan/release/build/generators/conan_toolchain.cmake"
         fi
         # Ensure ninja is in PATH and set CMAKE_MAKE_PROGRAM explicitly
         export PATH="/usr/bin:$PATH"
