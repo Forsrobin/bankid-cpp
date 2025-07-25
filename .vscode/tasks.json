@@ -1,0 +1,47 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Server (Static)",
+      "type": "shell",
+      "command": "./bankid_server.exe",
+      "options": {
+        "cwd": "${workspaceFolder}/build/vs2022-deb/server/Debug"
+      },
+      "group": "test",
+      "isBackground": true
+    },
+    {
+      "label": "Run Server (Shared)",
+      "type": "shell",
+      "command": "./bankid_server.exe",
+      "group": "test",
+      "options": {
+        "cwd": "${workspaceFolder}/build/vs2022-deb-shared/server/Debug"
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Run Tests (Static)",
+      "type": "shell",
+      "command": "./bankid_tests.exe",
+      "options": {
+        "cwd": "${workspaceFolder}/build/vs2022-deb/tests/Debug"
+      },
+      "group": "test",
+      "dependsOn": "Build Tests",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Tests (Shared)",
+      "type": "shell",
+      "command": "./bankid_tests.exe",
+      "options": {
+        "cwd": "${workspaceFolder}/build/vs2022-deb-shared/tests/Debug"
+      },
+      "group": "test",
+      "dependsOn": "Build Tests (Shared)",
+      "problemMatcher": []
+    },
+  ]
+}
