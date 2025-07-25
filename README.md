@@ -27,7 +27,8 @@ A comprehensive C++ library and REST API server for BankID authentication, built
 
 This project provides a comprehensive **BankID C++ library** that implements the complete BankID API for authentication, signing, and payment operations. The library is designed for easy integration into your own applications and includes a simple HTTP server example to demonstrate its usage.
 
-> [!NOTE] > **Focus**: The primary goal is to provide a robust, production-ready BankID library. The included server is just a demonstration example.
+> [!NOTE] 
+> **Focus**: The primary goal is to provide a robust, production-ready BankID library. The included server is just a demonstration example.
 
 ### Key Features
 
@@ -40,7 +41,8 @@ This project provides a comprehensive **BankID C++ library** that implements the
 - **SSL/TLS Support**: OpenSSL integration for secure communication
 - **Example HTTP Server**: Demo server built with CrowCpp to showcase library usage
 
-> [!WARNING] > **Important**: To test the library or demo server, you will need a **BankID test account** and valid test certificates from BankID.
+> [!WARNING] 
+> **Important**: To test the library or demo server, you will need a **BankID test account** and valid test certificates from BankID.
 
 ## Project Structure
 
@@ -178,7 +180,8 @@ cmake --install build/vs2022-deb --config Debug
 
 ## API Endpoints
 
-> [!IMPORTANT] > **Demo Server Only**: These HTTP endpoints are provided by the example server for demonstration. In your own application, you'll use the C++ library functions directly.
+> [!IMPORTANT] 
+> **Demo Server Only**: These HTTP endpoints are provided by the example server for demonstration. In your own application, you'll use the C++ library functions directly.
 
 The example HTTP server provides the following endpoints:
 
@@ -241,7 +244,8 @@ GET http://localhost:8080/poll
 
 ## Code Examples
 
-> [!TIP] > **Integration Focus**: These examples show how to integrate the BankID library into **your own application**. This is the primary use case for this library.
+> [!TIP] 
+> **Integration Focus**: These examples show how to integrate the BankID library into **your own application**. This is the primary use case for this library.
 
 ### Integrating into Your CMake Project
 
@@ -381,7 +385,8 @@ if (!testConfig.validate()) {
 
 ## QR Code Generation
 
-> [!NOTE] > **Automatic QR Handling**: The library includes built-in QR code generation that automatically updates every second for seamless user experience.
+> [!NOTE] 
+> **Automatic QR Handling**: The library includes built-in QR code generation that automatically updates every second for seamless user experience.
 
 The library includes a built-in QR code generator for seamless user experience.
 
