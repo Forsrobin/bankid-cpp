@@ -45,10 +45,12 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y ninja-build clang-17 clang++-17
+        sudo apt-get install -y ninja-build clang-17 clang++-17 libc++-17-dev libc++abi-17-dev
         # Verify ninja is installed and accessible
         which ninja
         ninja --version
+        clang++-17 --version
+        echo | clang++-17 -dM -E -std=c++23 - | grep __cplusplus
 
     - name: Install Conan
       run: |
@@ -79,11 +81,12 @@ jobs:
     - name: Configure CMake
       run: |
         export PATH="/usr/bin:$PATH"
-        cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }}  -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja
+        EXTRA_CXX_FLAGS="-stdlib=libc++ -std=c++23"
+        cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }}  -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja -DCMAKE_CXX_FLAGS="${EXTRA_CXX_FLAGS}"
 
     - name: Build project
       run: |
-        cmake --build --preset ${{ matrix.config.build_type == 'Debug' && 'unix-deb-ninja' || 'unix-rel-ninja' }}
+        cmake --build --preset ${{ matrix.config.build_type == 'Debug' && 'unix-deb-ninja' || 'unix-rel-ninja' }} --config ${{ matrix.config.build_type }}
 
     - name: Run tests
       run: |
