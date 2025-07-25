@@ -45,7 +45,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y ninja-build clang-17 clang++-17
+        sudo apt-get install -y ninja-build ninja clang-17 clang++-17
 
     - name: Install Conan
       run: |
@@ -77,9 +77,9 @@ jobs:
       run: |
         # Add the conan toolchain file for all builds
         if [ "${{ matrix.config.build_type }}" = "Debug" ]; then
-          TOOLCHAIN_FILE="${{ github.workspace }}/conan/debug/build/generators/conan_toolchain.cmake"
+          TOOLCHAIN_FILE="${{ github.workspace }}/bankid-cpp/conan/debug/build/generators/conan_toolchain.cmake"
         else
-          TOOLCHAIN_FILE="${{ github.workspace }}/conan/release/build/generators/conan_toolchain.cmake"
+          TOOLCHAIN_FILE="${{ github.workspace }}/bankid-cpp/conan/release/build/generators/conan_toolchain.cmake"
         fi
         cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }} -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE"
 
