@@ -66,23 +66,10 @@ jobs:
         run: |
           conan install . -s build_type=${{ matrix.config.conan_profile }} -of=conan/${{ matrix.config.build_type == 'Debug' && 'debug' || 'release' }} --build=missing
 
-      - name: Set up CMake preset name
-        id: cmake_preset
-        run: |
-          if [ "${{ matrix.config.shared }}" = "true" ]; then
-            # For shared builds, we need to use the shared presets (though they don't exist in the current config)
-            # We'll use the regular presets and override BUILD_SHARED_LIBS
-            echo "preset=${{ matrix.config.cmake_preset }}" >> $GITHUB_OUTPUT
-            echo "shared_flag=-DBUILD_SHARED_LIBS=ON" >> $GITHUB_OUTPUT
-          else
-            echo "preset=${{ matrix.config.cmake_preset }}" >> $GITHUB_OUTPUT
-            echo "shared_flag=-DBUILD_SHARED_LIBS=OFF" >> $GITHUB_OUTPUT
-          fi
-
       - name: Configure CMake
         run: |
           export PATH="/usr/bin:$PATH"
-          cmake --preset ${{ steps.cmake_preset.outputs.preset }} ${{ steps.cmake_preset.outputs.shared_flag }}  -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja
+          cmake --preset ${{ matrix.config.cmake_preset }} -DCMAKE_MAKE_PROGRAM=/usr/bin/ninja
 
       - name: Build project
         run: |
@@ -92,7 +79,7 @@ jobs:
         if: ${{ matrix.config.build_type == 'Debug' }}
         run: |
           cd build/${{ matrix.config.cmake_preset }}/tests
-          ctest -C ${{ matrix.config.build_type }} --output-on-failure --parallel $(nproc)
+          ctest -C ${{ matrix.config.build_type }} --output-on-failure 
 
       - name: Upload build artifacts (on failure)
         if: failure()
