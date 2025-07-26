@@ -5,7 +5,7 @@ namespace BankID
 {
   // New Session implementation using SSLConfig only
   Session::Session(const SSLConfig &sslConfig, const bool showDebugLog)
-      : m_sslConfig(sslConfig), m_initialized(false), m_cli(nullptr), m_showDebugLog(showDebugLog)
+      : m_sslConfig(sslConfig), m_cli(nullptr), m_initialized(false), m_showDebugLog(showDebugLog)
   {
     m_initialized = initialize();
   }
@@ -110,7 +110,7 @@ namespace BankID
       }
 
       return std::unexpected(BankID::AuthError{
-          500,
+          {500},
           BankID::BankIdErrorCode::NOT_INITIALIZED, "Session not initialized"});
     }
 
@@ -144,7 +144,7 @@ namespace BankID
       }
 
       return std::unexpected(AuthError{
-          403,
+          {403},
           BankIdErrorCode::INTERNAL_ERROR,
           "SSL server verification failed"});
     }
@@ -166,7 +166,7 @@ namespace BankID
       catch (const std::exception &e)
       {
         return std::unexpected(AuthError{
-            res->status,
+            {res->status},
             BankIdErrorCode::INVALID_PARAMETERS,
             std::string("Failed to parse response: ") + e.what()});
       }
@@ -177,7 +177,7 @@ namespace BankID
     if (it != customErrors.end())
     {
       return std::unexpected(AuthError{
-          res->status,
+          {res->status},
           BankIdErrorCode::INVALID_PARAMETERS, // Or let caller map their own code
           it->second});
     }
@@ -242,7 +242,7 @@ namespace BankID
         }
 
         return std::unexpected(AuthError{
-            res->status,
+            {res->status},
             errorCode,
             res->body});
       }
@@ -282,7 +282,7 @@ namespace BankID
         }
 
         return std::unexpected(AuthError{
-            res->status,
+            {res->status},
             errorCode,
             std::string("Non-JSON error response: ") + e.what() + " - " + res->body});
       }
@@ -304,14 +304,14 @@ namespace BankID
     if (defIt != defaultErrors.end())
     {
       return std::unexpected(AuthError{
-          res->status,
+          {res->status},
           defIt->second.first,
           defIt->second.second});
     }
 
     // Fallback for unknown codes
     return std::unexpected(AuthError{
-        res->status,
+        {res->status},
         BankIdErrorCode::INTERNAL_ERROR,
         "Unhandled HTTP error"});
   }
@@ -369,7 +369,7 @@ namespace BankID
   {
     int seconds = getElapsedSeconds();
     if (isExpired())
-      return std::unexpected(BankID::API::ErrorResponse{404, "QR code expired", "The QR code has expired after 30 seconds."});
+      return std::unexpected(BankID::API::ErrorResponse{{404}, "QR code expired", "The QR code has expired after 30 seconds."});
 
     std::string authCode = computeAuthCode(seconds);
     return "bankid." + m_qr_start_token + "." + std::to_string(seconds) + "." + authCode;
