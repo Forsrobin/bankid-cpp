@@ -13,7 +13,11 @@ find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
 # Create the BankID library (shared/static based on BUILD_SHARED_LIBS)
-add_library(bankid_lib ${BANKID_LIB_SOURCES})
+if(BUILD_SHARED_LIBS)
+    add_library(bankid_lib SHARED ${BANKID_LIB_SOURCES})
+else()
+    add_library(bankid_lib STATIC ${BANKID_LIB_SOURCES})
+endif()
 
 # Set library properties
 set_target_properties(bankid_lib PROPERTIES

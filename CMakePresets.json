@@ -99,7 +99,6 @@
         "conan-deb-unix"
       ],
       "cacheVariables": {
-        "CMAKE_CXX_FLAGS": "-O0 --coverage -g -fsanitize=address",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-deb-ninja/install"
       }
     },
