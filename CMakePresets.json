@@ -9,6 +9,27 @@
       }
     },
     {
+      "name": "conan-deb-unix",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/conan/debug/build/Debug/generators/conan_toolchain.cmake"
+      }
+    },
+    {
+      "name": "conan-rel",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/conan/release/build/generators/conan_toolchain.cmake"
+      }
+    },
+    {
+      "name": "conan-rel-unix",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/conan/release/build/Release/generators/conan_toolchain.cmake"
+      }
+    },
+    {
       "name": "rel",
       "hidden": true,
       "cacheVariables": {
@@ -29,32 +50,13 @@
       }
     },
     {
-      "name": "unix-make",
-      "hidden": true,
-      "generator": "Unix Makefiles",
-      "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_FLAGS_INIT": "$env{CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic"
-      }
-    },
-    {
       "name": "unix-ninja",
       "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang-17",
-        "CMAKE_CXX_COMPILER": "clang++-17",
+        "CMAKE_CXX_COMPILER": "clang++-19",
+        "CMAKE_C_COMPILER": "clang-19",
         "CMAKE_CXX_FLAGS_INIT": "$env{CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -pedantic"
-      }
-    },
-    {
-      "name": "unix-shared",
-      "hidden": true,
-      "inherits": "unix-make",
-      "cacheVariables": {
-        "CMAKE_CXX_FLAGS_INIT": "$env{CMAKE_CXX_FLAGS_INIT} $env{CMAKE_CXX_FLAGS} -fPIC -Werror -Wall -Wextra -pedantic",
-        "BUILD_SHARED_LIBS": true
       }
     },
     {
@@ -74,68 +76,42 @@
         "BUILD_SHARED_LIBS": true
       }
     },
-
-    {
-      "name": "unix-rel",
-      "displayName": "Unix Make Release",
-      "binaryDir": "${sourceDir}/build/unix-rel",
-      "inherits": ["unix-make", "rel"],
-      "cacheVariables": {
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-rel/install"
-      }
-    },
     {
       "name": "unix-rel-ninja",
       "displayName": "Unix Ninja Clang Release",
       "binaryDir": "${sourceDir}/build/unix-rel-ninja",
-      "inherits": ["unix-ninja", "rel"],
+      "inherits": [
+        "unix-ninja",
+        "rel",
+        "conan-rel-unix"
+      ],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-rel-ninja/install"
-      }
-    },
-    {
-      "name": "unix-rel-shared",
-      "displayName": "Unix Make Release Shared",
-      "binaryDir": "${sourceDir}/build/unix-rel-shared",
-      "inherits": ["unix-shared", "unix-rel"],
-      "cacheVariables": {
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-rel-shared/install"
-      }
-    },
-    {
-      "name": "unix-deb",
-      "displayName": "Unix Make Debug",
-      "binaryDir": "${sourceDir}/build/unix-deb",
-      "inherits": ["unix-make", "deb", "conan-deb"],
-      "cacheVariables": {
-        "CMAKE_CXX_FLAGS": "-O0 --coverage -g -fsanitize=address",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-deb/install"
       }
     },
     {
       "name": "unix-deb-ninja",
       "displayName": "Unix Ninja Clang Debug",
       "binaryDir": "${sourceDir}/build/unix-deb-ninja",
-      "inherits": ["unix-ninja", "deb", "conan-deb"],
+      "inherits": [
+        "unix-ninja",
+        "deb",
+        "conan-deb-unix"
+      ],
       "cacheVariables": {
         "CMAKE_CXX_FLAGS": "-O0 --coverage -g -fsanitize=address",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-deb-ninja/install"
       }
     },
     {
-      "name": "unix-deb-shared",
-      "displayName": "Unix Make Debug Shared",
-      "binaryDir": "${sourceDir}/build/unix-deb-shared",
-      "inherits": ["unix-shared", "unix-deb"],
-      "cacheVariables": {
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/unix-deb-shared/install"
-      }
-    },
-    {
       "name": "vs2022-rel",
       "displayName": "Visual Studio 2022 Release",
       "binaryDir": "${sourceDir}/build/vs2022-rel",
-      "inherits": ["vs2022", "rel"],
+      "inherits": [
+        "vs2022",
+        "rel",
+        "conan-rel"
+      ],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/vs2022-rel/install"
       }
@@ -144,7 +120,11 @@
       "name": "vs2022-deb",
       "displayName": "Visual Studio 2022 Debug",
       "binaryDir": "${sourceDir}/build/vs2022-deb",
-      "inherits": ["vs2022", "deb", "conan-deb"],
+      "inherits": [
+        "vs2022",
+        "deb",
+        "conan-deb"
+      ],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/vs2022-deb/install"
       }
@@ -153,7 +133,11 @@
       "name": "vs2022-rel-shared",
       "displayName": "Visual Studio 2022 Release Shared",
       "binaryDir": "${sourceDir}/build/vs2022-rel-shared",
-      "inherits": ["vs2022-shared", "rel"],
+      "inherits": [
+        "vs2022-shared",
+        "rel",
+        "conan-rel"
+      ],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/vs2022-rel/install"
       }
@@ -162,7 +146,11 @@
       "name": "vs2022-deb-shared",
       "displayName": "Visual Studio 2022 Debug Shared",
       "binaryDir": "${sourceDir}/build/vs2022-deb-shared",
-      "inherits": ["vs2022-shared", "deb", "conan-deb"],
+      "inherits": [
+        "vs2022-shared",
+        "deb",
+        "conan-deb"
+      ],
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/vs2022-rel/install"
       }
@@ -194,39 +182,15 @@
       "configuration": "Debug"
     },
     {
-      "name": "unix-deb",
-      "displayName": "Unix Make Debug Build",
-      "configurePreset": "unix-deb",
-      "configuration": "Debug"
-    },
-    {
       "name": "unix-deb-ninja",
       "displayName": "Unix Ninja Debug Build",
       "configurePreset": "unix-deb-ninja",
       "configuration": "Debug"
     },
     {
-      "name": "unix-deb-shared",
-      "displayName": "Unix Make Debug Build",
-      "configurePreset": "unix-deb-shared",
-      "configuration": "Debug"
-    },
-    {
-      "name": "unix-rel",
-      "displayName": "Unix Make Release Build",
-      "configurePreset": "unix-rel",
-      "configuration": "Release"
-    },
-    {
       "name": "unix-rel-ninja",
       "displayName": "Unix Ninja Release Build",
       "configurePreset": "unix-rel-ninja",
-      "configuration": "Release"
-    },
-    {
-      "name": "unix-rel-shared",
-      "displayName": "Unix Make Release Build",
-      "configurePreset": "unix-rel-shared",
       "configuration": "Release"
     }
   ]

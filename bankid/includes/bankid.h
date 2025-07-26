@@ -27,14 +27,16 @@ using json = nlohmann::json;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 #else
+#ifdef BANKID_EXPORTS
+#define BANKID_API __attribute__((visibility("default")))
+#else
 #define BANKID_API
 #endif
-
-// Forward declaration - implementation in bankid.cpp
-bool file_exists(const std::string &path);
+#endif
 
 namespace BankID
 {
+
   struct BANKID_API AppConfig
   {
     std::string appIdentifier;
@@ -87,6 +89,7 @@ namespace BankID
       return encoded;
     }
   };
+
 
   /** SSL configuration structure
    * This structure contains the SSL configuration for the BankID API.
@@ -147,16 +150,16 @@ namespace BankID
     std::expected<bool, std::string> validate() const
     {
       // Verify certificate files exist
-      if (!file_exists(this->pemCertPath))
+      if (!std::filesystem::exists(this->pemCertPath))
       {
         return std::unexpected("Certificate file does not exist: " + this->pemCertPath);
       }
 
-      if (!file_exists(this->pemKeyPath))
+      if (!std::filesystem::exists(this->pemKeyPath))
       {
         return std::unexpected("Key file does not exist: " + this->pemKeyPath);
       }
-      if (!file_exists(this->caFilePath))
+      if (!std::filesystem::exists(this->caFilePath))
       {
         return std::unexpected("CA file does not exist: " + this->caFilePath);
       }
@@ -258,7 +261,7 @@ namespace BankID
 
     // Get current token
     bool isInitialized() const { return m_initialized; }
-    const bool initialize();
+    bool initialize();
     const SSLConfig &getSSLConfig() const { return m_sslConfig; }
 
   private:

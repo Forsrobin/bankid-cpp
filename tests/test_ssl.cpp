@@ -7,7 +7,7 @@
 #include <iostream>
 #include <fstream>
 
-class ConfigParamaters : public ::testing::Test
+class SSLConfigTest : public ::testing::Test
 {
 protected:
   void SetUp() override
@@ -19,7 +19,7 @@ protected:
   }
 };
 
-TEST_F(ConfigParamaters, BasicDefaultValidConfig)
+TEST_F(SSLConfigTest, BasicDefaultValidConfig)
 {
   BankID::SSLConfig sslConfig(BankID::Environment::TEST);
 
@@ -27,7 +27,7 @@ TEST_F(ConfigParamaters, BasicDefaultValidConfig)
   EXPECT_TRUE(sslConfig.validate());
 }
 
-TEST_F(ConfigParamaters, BasicDefaultInvalidConfig)
+TEST_F(SSLConfigTest, BasicDefaultInvalidConfig)
 {
   BankID::SSLConfig sslConfig(BankID::Environment::TEST, "certs/invalid.ca",
                               "certs/bankid_cert.pem", "certs/bankid_key.pem");
@@ -36,7 +36,7 @@ TEST_F(ConfigParamaters, BasicDefaultInvalidConfig)
   EXPECT_FALSE(sslConfig.validate());
 }
 
-TEST_F(ConfigParamaters, CustomConfig)
+TEST_F(SSLConfigTest, CustomConfig)
 {
   BankID::SSLConfig sslConfig(BankID::Environment::PRODUCTION, "certs/prod.ca",
                               "certs/bankid_cert.pem", "certs/bankid_key.pem");
@@ -45,7 +45,7 @@ TEST_F(ConfigParamaters, CustomConfig)
   EXPECT_TRUE(sslConfig.validate());
 }
 
-TEST_F(ConfigParamaters, SendApiRequestWithValidConfig)
+TEST_F(SSLConfigTest, SendApiRequestWithValidConfig)
 {
   BankID::SSLConfig sslConfig(BankID::Environment::TEST);
 
@@ -71,7 +71,7 @@ TEST_F(ConfigParamaters, SendApiRequestWithValidConfig)
   EXPECT_EQ(cancelResponse.value().httpStatus, 200);
 }
 
-TEST_F(ConfigParamaters, SendApiRequestWithInvalidConfig)
+TEST_F(SSLConfigTest, SendApiRequestWithInvalidConfig)
 {
   BankID::SSLConfig sslConfig(BankID::Environment::TEST, "certs/prod.ca",
                               "certs/bankid_cert.pem", "certs/bankid_key.pem");

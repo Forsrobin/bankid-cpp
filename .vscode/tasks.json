@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Run Server (Static)",
+      "label": "Run Server Debug (Static)",
       "type": "shell",
       "command": "./bankid_server.exe",
       "options": {
@@ -12,7 +12,7 @@
       "isBackground": true
     },
     {
-      "label": "Run Server (Shared)",
+      "label": "Run Server Debug (Shared)",
       "type": "shell",
       "command": "./bankid_server.exe",
       "group": "test",
@@ -22,7 +22,27 @@
       "isBackground": true
     },
     {
-      "label": "Run Tests (Static)",
+      "label": "Run Server Release (Static)",
+      "type": "shell",
+      "command": "./bankid_server.exe",
+      "options": {
+        "cwd": "${workspaceFolder}/build/vs2022-rel/server/Release"
+      },
+      "group": "test",
+      "isBackground": true
+    },
+    {
+      "label": "Run Server Release (Shared)",
+      "type": "shell",
+      "command": "./bankid_server.exe",
+      "group": "test",
+      "options": {
+        "cwd": "${workspaceFolder}/build/vs2022-rel-shared/server/Release"
+      },
+      "isBackground": true
+    },
+    {
+      "label": "Run Tests Debug (Static)",
       "type": "shell",
       "command": "./bankid_tests.exe",
       "options": {
@@ -33,7 +53,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Run Tests (Shared)",
+      "label": "Run Tests Debug (Shared)",
       "type": "shell",
       "command": "./bankid_tests.exe",
       "options": {
