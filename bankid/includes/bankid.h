@@ -16,18 +16,22 @@
 using json = nlohmann::json;
 
 #ifdef _WIN32
-#ifdef BANKID_STATIC
-#define BANKID_API
-#elif defined(BANKID_EXPORTS)
-#define BANKID_API __declspec(dllexport)
+  #ifdef BANKID_STATIC
+    #define BANKID_API
+  #elif defined(BANKID_EXPORTS)
+    #define BANKID_API __declspec(dllexport)
+  #else
+    #define BANKID_API __declspec(dllimport)
+  #endif
+  // Suppress C4251 warnings for STL types in DLL interface
+  #pragma warning(push)
+  #pragma warning(disable : 4251)
 #else
-#define BANKID_API __declspec(dllimport)
-#endif
-// Suppress C4251 warnings for STL types in DLL interface
-#pragma warning(push)
-#pragma warning(disable : 4251)
-#else
-#define BANKID_API
+  #ifdef BANKID_EXPORTS
+      #define BANKID_API __attribute__((visibility("default")))
+  #else
+      #define BANKID_API
+  #endif
 #endif
 
 // Forward declaration - implementation in bankid.cpp
@@ -258,7 +262,7 @@ namespace BankID
 
     // Get current token
     bool isInitialized() const { return m_initialized; }
-    const bool initialize();
+    bool initialize();
     const SSLConfig &getSSLConfig() const { return m_sslConfig; }
 
   private:

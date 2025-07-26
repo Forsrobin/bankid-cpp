@@ -23,7 +23,7 @@ namespace BankID
     }
   }
 
-  const bool Session::initialize()
+  bool Session::initialize() 
   {
     if (!m_sslConfig.validate())
     {
