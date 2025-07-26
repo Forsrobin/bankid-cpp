@@ -42,11 +42,19 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install system dependencies
+      - name: Install Clang 19
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build clang-19
-          clang --version
+          sudo apt-get install -y wget gnupg lsb-release
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 19
+
+      - name: Configure with Clang 19
+        run: |
+          export CC=clang-19
+          export CXX=clang++-19
+          cmake -B build -G Ninja .
 
       - name: Install Conan
         run: |
