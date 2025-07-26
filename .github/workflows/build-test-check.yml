@@ -9,26 +9,14 @@ jobs:
     strategy:
       matrix:
         config:
-          # - name: 'Release Static'
-          #   build_type: 'Release'
-          #   conan_profile: 'Release'
-          #   cmake_preset: 'unix-rel-ninja'
-          #   shared: false
-          # - name: "Release Shared"
-          #   build_type: "Release"
-          #   conan_profile: "Release"
-          #   cmake_preset: "unix-rel-ninja"  # Will be modified for shared
-          #   shared: true
-          # - name: "Debug Static"
-          #   build_type: "Debug"
-          #   conan_profile: "Debug"
-          #   cmake_preset: "unix-deb-ninja"
-          #   shared: false
-          - name: "Debug Shared"
+          - name: "Release"
+            build_type: "Release"
+            conan_profile: "Release"
+            cmake_preset: "unix-rel-ninja"  # Will be modified for shared
+          - name: "Debug"
             build_type: "Debug"
             conan_profile: "Debug"
             cmake_preset: "unix-deb-ninja"  # Will be modified for shared
-            shared: true
 
     runs-on: ubuntu-latest
     name: ${{ matrix.config.name }}
