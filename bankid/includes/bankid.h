@@ -90,7 +90,6 @@ namespace BankID
     }
   };
 
-
   /** SSL configuration structure
    * This structure contains the SSL configuration for the BankID API.
    * It includes the environment, CA file path, PEM certificate path, and PEM key path.
@@ -100,6 +99,8 @@ namespace BankID
    * For example:
    *    openssl pkcs12 -in bankid_cert.p12 -out bankid_key.pem -nocerts -nodes
    *    openssl pkcs12 -in bankid_cert.p12 -out bankid_cert.pem -clcerts -nokeys
+   * 
+   * This structure is used to initialize the SSL client with the correct paths for the CA file, certificate, and key.
    */
   struct BANKID_API SSLConfig
   {
@@ -135,11 +136,13 @@ namespace BankID
       }
     }
 
-    SSLConfig(Environment env, const std::string &caFilePath,
-              const std::string &pemCertPath, const std::string &pemKeyPath)
-        : environment(env), caFilePath(caFilePath), pemCertPath(pemCertPath), pemKeyPath(pemKeyPath)
+    SSLConfig(Environment env, const std::string &caFilePath, const std::string &pemCertPath, const std::string &pemKeyPath)
     {
-    }
+      this->environment = env;
+      this->caFilePath = caFilePath;
+      this->pemCertPath = pemCertPath;
+      this->pemKeyPath = pemKeyPath;
+    };
 
     /**
      * Validate the SSL configuration
@@ -270,6 +273,10 @@ namespace BankID
      * @param endpoint The API endpoint (e.g., "/auth", "/sign", etc.)
      * @param config Any config object that has a toJson() method
      * @return Expected response or error
+     * @brief This method handles the actual HTTP request to the BankID API.
+     * It constructs the request, sends it, and processes the response.
+     * It uses the provided config object to generate the JSON payload.
+     * It also validates the session state before making the request.
      */
     template <typename ConfigType>
     const std::expected<typename ConfigType::ResponseType, BankID::AuthError> makeApiCall(
@@ -278,6 +285,13 @@ namespace BankID
 
     /**
      * Validate response status and parse JSON
+     * @param res The HTTP response from the API call
+     * @param customErrors Optional map of custom error codes and messages
+     * @return Parsed response or AuthError
+     * @brief This method checks the HTTP status code and attempts to parse the response body as JSON.
+     * If the status code is 200, it parses the JSON and returns the expected response type.
+     * If the status code indicates an error, it checks for custom error mappings or attempts to parse an error response.
+     * If parsing fails, it returns an AuthError with the appropriate error code and message.
      */
     template <typename T>
     const std::expected<T, BankID::AuthError> validateStatusAndParse(
@@ -294,9 +308,9 @@ namespace BankID
     bool isExpired() const;                                                       // Returns true if 30s has passed
 
   private:
-    std::string m_qr_start_token;
-    std::string m_qr_start_secret;
-    std::chrono::steady_clock::time_point m_creation_time;
+    std::string m_qrStartToken;
+    std::string m_qrStartSecret;
+    std::chrono::steady_clock::time_point m_creationTime;
 
     int getElapsedSeconds() const;
     std::string computeAuthCode(int seconds) const;
@@ -329,9 +343,9 @@ namespace BankID
     void cleanupLoop();
 
     std::unordered_map<std::string, std::shared_ptr<QRGenerator>> m_cache;
-    std::mutex m_cache_mutex;
+    std::mutex m_cacheMutex;
 
-    std::thread cleaner_thread;
+    std::thread m_cleanerThread;
     std::condition_variable m_cv;
     std::mutex cv_mutex;
     std::atomic<bool> m_running;

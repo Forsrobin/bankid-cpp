@@ -110,7 +110,7 @@ endif()
 # Copy certificates folder to output directory for tests
 add_custom_command(TARGET bankid_tests POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIR}/../server/certs
+    ${CMAKE_CURRENT_SOURCE_DIR}/certs
     $<TARGET_FILE_DIR:bankid_tests>/certs
     COMMENT "Copying certificates folder to tests output directory"
     VERBATIM

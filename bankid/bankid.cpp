@@ -319,13 +319,13 @@ namespace BankID
   // qr code generator cache implementation
 
   QRGenerator::QRGenerator(std::string token, std::string secret)
-      : m_qr_start_token(std::move(token)), m_qr_start_secret(std::move(secret)),
-        m_creation_time(std::chrono::steady_clock::now()) {}
+      : m_qrStartToken(std::move(token)), m_qrStartSecret(std::move(secret)),
+        m_creationTime(std::chrono::steady_clock::now()) {}
 
   int QRGenerator::getElapsedSeconds() const
   {
     auto now = std::chrono::steady_clock::now();
-    return static_cast<int>(std::chrono::duration_cast<std::chrono::seconds>(now - m_creation_time).count());
+    return static_cast<int>(std::chrono::duration_cast<std::chrono::seconds>(now - m_creationTime).count());
   }
 
   bool QRGenerator::isExpired() const
@@ -338,14 +338,14 @@ namespace BankID
     std::cout << "QRGenerator: Computing HMAC digest for seconds: " << seconds << std::endl;
 
     std::string timeStr = std::to_string(seconds);
-    size_t keyLength = m_qr_start_secret.size();
+    size_t keyLength = m_qrStartSecret.size();
     if (keyLength > static_cast<size_t>(INT_MAX))
     {
       throw std::runtime_error("Secret key length exceeds INT_MAX");
     }
 
     unsigned char *digest = HMAC(EVP_sha256(),
-                                 reinterpret_cast<const unsigned char *>(m_qr_start_secret.data()),
+                                 reinterpret_cast<const unsigned char *>(m_qrStartSecret.data()),
                                  static_cast<int>(keyLength),
                                  reinterpret_cast<const unsigned char *>(timeStr.c_str()),
                                  static_cast<int>(timeStr.size()),
@@ -372,12 +372,12 @@ namespace BankID
       return std::unexpected(BankID::API::ErrorResponse{{404}, "QR code expired", "The QR code has expired after 30 seconds."});
 
     std::string authCode = computeAuthCode(seconds);
-    return "bankid." + m_qr_start_token + "." + std::to_string(seconds) + "." + authCode;
+    return "bankid." + m_qrStartToken + "." + std::to_string(seconds) + "." + authCode;
   }
 
   QRGeneratorCache::QRGeneratorCache() : m_running(true)
   {
-    cleaner_thread = std::thread([this]()
+    m_cleanerThread = std::thread([this]()
                                  { cleanupLoop(); });
   }
 
@@ -394,13 +394,13 @@ namespace BankID
 
   void QRGeneratorCache::add(const std::string &orderRef, const std::string &qrStartToken, const std::string &qrStartSecret)
   {
-    std::lock_guard<std::mutex> lock(m_cache_mutex);
+    std::lock_guard<std::mutex> lock(m_cacheMutex);
     m_cache[orderRef] = std::make_shared<QRGenerator>(qrStartToken, qrStartSecret);
   }
 
   std::shared_ptr<QRGenerator> QRGeneratorCache::get(const std::string &orderRef)
   {
-    std::lock_guard<std::mutex> lock(m_cache_mutex);
+    std::lock_guard<std::mutex> lock(m_cacheMutex);
     auto it = m_cache.find(orderRef);
     if (it != m_cache.end())
     {
@@ -416,7 +416,7 @@ namespace BankID
 
   void QRGeneratorCache::remove(const std::string &orderRef)
   {
-    std::lock_guard<std::mutex> lock(m_cache_mutex);
+    std::lock_guard<std::mutex> lock(m_cacheMutex);
     m_cache.erase(orderRef);
   }
 
@@ -427,9 +427,9 @@ namespace BankID
       m_running = false;
     }
     m_cv.notify_all();
-    if (cleaner_thread.joinable())
+    if (m_cleanerThread.joinable())
     {
-      cleaner_thread.join();
+      m_cleanerThread.join();
     }
   }
 
@@ -444,7 +444,7 @@ namespace BankID
       if (!m_running)
         break;
 
-      std::lock_guard<std::mutex> cacheLock(m_cache_mutex);
+      std::lock_guard<std::mutex> cacheLock(m_cacheMutex);
       for (auto it = m_cache.begin(); it != m_cache.end();)
       {
         if (it->second->isExpired())
