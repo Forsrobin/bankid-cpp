@@ -1,10 +1,5 @@
 #include "bankid.h"
 
-// Implementation of file_exists function
-bool file_exists(const std::string &path)
-{
-  return std::filesystem::exists(path);
-}
 
 namespace BankID
 {

@@ -16,29 +16,27 @@
 using json = nlohmann::json;
 
 #ifdef _WIN32
-  #ifdef BANKID_STATIC
-    #define BANKID_API
-  #elif defined(BANKID_EXPORTS)
-    #define BANKID_API __declspec(dllexport)
-  #else
-    #define BANKID_API __declspec(dllimport)
-  #endif
-  // Suppress C4251 warnings for STL types in DLL interface
-  #pragma warning(push)
-  #pragma warning(disable : 4251)
+#ifdef BANKID_STATIC
+#define BANKID_API
+#elif defined(BANKID_EXPORTS)
+#define BANKID_API __declspec(dllexport)
 #else
-  #ifdef BANKID_EXPORTS
-      #define BANKID_API __attribute__((visibility("default")))
-  #else
-      #define BANKID_API
-  #endif
+#define BANKID_API __declspec(dllimport)
 #endif
-
-// Forward declaration - implementation in bankid.cpp
-bool file_exists(const std::string &path);
+// Suppress C4251 warnings for STL types in DLL interface
+#pragma warning(push)
+#pragma warning(disable : 4251)
+#else
+#ifdef BANKID_EXPORTS
+#define BANKID_API __attribute__((visibility("default")))
+#else
+#define BANKID_API
+#endif
+#endif
 
 namespace BankID
 {
+
   struct BANKID_API AppConfig
   {
     std::string appIdentifier;
@@ -91,6 +89,7 @@ namespace BankID
       return encoded;
     }
   };
+
 
   /** SSL configuration structure
    * This structure contains the SSL configuration for the BankID API.
@@ -151,16 +150,16 @@ namespace BankID
     std::expected<bool, std::string> validate() const
     {
       // Verify certificate files exist
-      if (!file_exists(this->pemCertPath))
+      if (!std::filesystem::exists(this->pemCertPath))
       {
         return std::unexpected("Certificate file does not exist: " + this->pemCertPath);
       }
 
-      if (!file_exists(this->pemKeyPath))
+      if (!std::filesystem::exists(this->pemKeyPath))
       {
         return std::unexpected("Key file does not exist: " + this->pemKeyPath);
       }
-      if (!file_exists(this->caFilePath))
+      if (!std::filesystem::exists(this->caFilePath))
       {
         return std::unexpected("CA file does not exist: " + this->caFilePath);
       }
