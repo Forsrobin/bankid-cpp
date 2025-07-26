@@ -15,6 +15,11 @@ find_package(nlohmann_json REQUIRED)
 # Create the BankID library (shared/static based on BUILD_SHARED_LIBS)
 if(BUILD_SHARED_LIBS)
     add_library(bankid_lib SHARED ${BANKID_LIB_SOURCES})
+    # Set symbol visibility for shared libraries
+    set_target_properties(bankid_lib PROPERTIES
+        CXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN YES
+    )
 else()
     add_library(bankid_lib STATIC ${BANKID_LIB_SOURCES})
 endif()
@@ -26,15 +31,16 @@ set_target_properties(bankid_lib PROPERTIES
     SOVERSION ${PROJECT_VERSION_MAJOR}
 )
 
-# Set compile definitions for Windows DLL export/import
-if(WIN32)
-    if(BUILD_SHARED_LIBS)
-        target_compile_definitions(bankid_lib PRIVATE BANKID_EXPORTS)
-    else()
-        # For static libraries, we don't need the export/import macros
-        target_compile_definitions(bankid_lib PUBLIC BANKID_STATIC)
-    endif()
+# Set compile definitions for symbol export/import
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(bankid_lib PRIVATE BANKID_EXPORTS)
+    # For consumers of the shared library
+    target_compile_definitions(bankid_lib INTERFACE BANKID_SHARED)
+else()
+    # For static libraries, we don't need the export/import macros
+    target_compile_definitions(bankid_lib PUBLIC BANKID_STATIC)
 endif()
+
 
 # Include directories for the library
 target_include_directories(bankid_lib PUBLIC 
@@ -42,6 +48,7 @@ target_include_directories(bankid_lib PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
+target_compile_features(bankid_lib PUBLIC cxx_std_23)
 target_link_libraries(bankid_lib PUBLIC OpenSSL::SSL OpenSSL::Crypto nlohmann_json::nlohmann_json)
 
 # Installation rules
@@ -54,6 +61,8 @@ install(TARGETS bankid_lib
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+
 
 # Install headers
 install(DIRECTORY ${BANKID_INCLUDE_DIR}/
