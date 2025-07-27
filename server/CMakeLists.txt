@@ -16,7 +16,11 @@ find_package(Crow REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
 # Server executable
-add_executable(bankid_server main.cpp)
+add_executable(bankid_server 
+    main.cpp
+    webserver.cpp
+    routes.cpp
+)
 
 # Enable SSL compilation flag
 if (CROW_ENABLE_SSL)

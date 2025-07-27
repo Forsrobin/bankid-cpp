@@ -1,3 +1,6 @@
+#ifndef BANKID_API_PHONE_SIGN_H
+#define BANKID_API_PHONE_SIGN_H
+
 #pragma once
 
 #include "../bankid.h"
@@ -148,3 +151,5 @@ namespace BankID::API
   };
 
 } // namespace BankID::API
+
+#endif // BANKID_API_PHONE_SIGN_H

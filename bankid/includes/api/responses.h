@@ -1,3 +1,6 @@
+#ifndef BANKID_API_RESPONSES_H
+#define BANKID_API_RESPONSES_H
+
 #pragma once
 
 #include "../bankid.h"
@@ -256,4 +259,6 @@ namespace BankID::API
     if (j.contains("hintCode"))
       r.hintCode = j.at("hintCode").get<std::string>();
   }
-}
+} // namespace BankID::API
+
+#endif // BANKID_API_RESPONSES_H
