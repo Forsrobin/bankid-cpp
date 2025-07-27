@@ -3,6 +3,15 @@
 #include <csignal>
 #include <memory>
 
+/**
+* @file main.cpp
+* @brief Main entry point for the BankID server application.
+*
+* This file initializes the web server and handles graceful shutdown.
+* It sets up signal handlers for cleanup on termination.
+* It also provides a usage message if no port is specified.
+*/
+
 std::unique_ptr<WebServer> server;
 
 void handleShutdown(int signal)
