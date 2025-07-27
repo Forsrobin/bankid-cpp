@@ -1,3 +1,16 @@
+//
+//  bankid.h
+//
+//  Copyright (c) 2025 Forsrobin. All rights reserved.
+//  MIT License
+//
+//  This file is part of the BankID C++ library, providing a client for the BankID API.
+//
+
+
+#ifndef BANKID_H
+#define BANKID_H
+
 #pragma once
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
@@ -99,7 +112,7 @@ namespace BankID
    * For example:
    *    openssl pkcs12 -in bankid_cert.p12 -out bankid_key.pem -nocerts -nodes
    *    openssl pkcs12 -in bankid_cert.p12 -out bankid_cert.pem -clcerts -nokeys
-   * 
+   *
    * This structure is used to initialize the SSL client with the correct paths for the CA file, certificate, and key.
    */
   struct BANKID_API SSLConfig
@@ -356,3 +369,5 @@ namespace BankID
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
+
+#endif // BANKID_H
