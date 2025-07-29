@@ -263,10 +263,10 @@ target_link_libraries(your_target PRIVATE BankID::bankid_lib)
 ```cpp
 #include "bankid.h"
 
+const std::string socialSecurityNumber = "1234567891"
+
 // Configure SSL for test environment
-BankID::SSLConfig sslConfig(BankID::Environment::TEST,
-                           "certs/bankid_cert.pem",
-                           "certs/bankid_key.pem");
+BankID::SSLConfig sslConfig(BankID::Environment::TEST);
 
 // Enable/disable debug logging
 const bool showDebug = true;
@@ -275,38 +275,62 @@ const bool showDebug = true;
 BankID::Session session(sslConfig, showDebug);
 
 // Initialize the session
-if (!session.initialize()) {
-    std::cerr << "Failed to initialize BankID session" << std::endl;
-    return -1;
+if (!session.initialize())
+{
+  std::cerr << "Failed to initialize BankID session" << std::endl;
+  return -1;
 }
+
+BankID::Requirement requirement;
+requirement.personalNumber = socialSecurityNumber; // Example personal number from command line
 
 // Start authentication
-BankID::API::AuthConfig authConfig("192.168.1.1"); // End user IP
+BankID::API::AuthConfig authConfig("192.168.1.1");
+authConfig.setRequirement(requirement);
+
 auto authResult = session.auth(authConfig);
 
-if (authResult.has_value()) {
-    std::cout << "Authentication started. Order ref: "
-              << authResult->orderRef << std::endl;
+if (authResult.has_value())
+{
+  std::cout << "Authentication started. Order ref: "
+            << authResult->orderRef << std::endl;
 
-    // Poll for completion
-    BankID::API::CollectConfig collectConfig(authResult->orderRef);
+  // Poll for completion
+  BankID::API::CollectConfig collectConfig(authResult->orderRef);
 
-    while (true) {
-        auto collectResult = session.collect(collectConfig);
-        if (collectResult.has_value()) {
-            if (collectResult->status == "COMPLETED") {
-                std::cout << "Authentication completed!" << std::endl;
-                break;
-            } else if (collectResult->status == "FAILED") {
-                std::cout << "Authentication failed!" << std::endl;
-                break;
-            }
+  while (true)
+  {
+    auto collectResult = session.collect(collectConfig);
+    if (collectResult.has_value())
+    {
+      if (collectResult->status == BankID::API::CollectStatus::COMPLETE)
+      {
+        std::cout << "Authentication completed successfully!" << std::endl;
+        std::cout << "Order ref: " << collectResult->orderRef << std::endl;
+        if (collectResult->completionData)
+        {
+          std::cout << "Completion data: " << collectResult->completionData->user->givenName.value_or("N/A") << std::endl;
         }
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        break;
+      }
+      else if (collectResult->status == BankID::API::CollectStatus::PENDING)
+      {
+        std::cout << "Authentication still pending..." << std::endl;
+      }
+      else if (collectResult->status == BankID::API::CollectStatus::FAILED)
+      {
+        std::cout << "Authentication falses!" << std::endl;
+        break;
+      }
     }
-} else {
-    std::cerr << "Authentication failed: " << authResult.error().message << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+  }
 }
+else
+{
+  std::cerr << "Authentication failed: " << authResult.error().details << std::endl;
+}
+  
 ```
 
 ### Advanced Authentication with Requirements
