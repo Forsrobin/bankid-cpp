@@ -90,7 +90,7 @@ namespace BankID::API
     /**
      * Constructor for PaymentConfig
      * @param endUserIp The IP address of the end user (required)
-     * @param userVisibleTransaction Transaction information displayed to user (required)
+     * @param userVisibleTransaction Transaction information displayed to user (required) 
      */
     PaymentConfig(const std::string &endUserIp, const UserVisibleTransaction &userVisibleTransaction)
         : m_endUserIp(endUserIp), m_userVisibleTransaction(userVisibleTransaction) {}

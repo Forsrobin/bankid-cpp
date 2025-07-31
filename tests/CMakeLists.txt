@@ -17,12 +17,12 @@ add_executable(bankid_tests
     test_ssl.cpp
     test_auth.cpp
     test_sign.cpp
-    # test_payment.cpp
+    test_payment.cpp
     # test_other_payment.cpp
     # test_phone_auth.cpp
     # test_phone_sign.cpp
     # test_collect.cpp
-    # test_cancel.cpp
+    test_cancel.cpp
 )
 
 # Link libraries
@@ -124,6 +124,12 @@ set_tests_properties(AuthTests PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR:ba
 
 add_test(NAME SignTests COMMAND bankid_tests --gtest_filter=SignTest.*)
 set_tests_properties(SignTests PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR:bankid_tests>)
+
+add_test(NAME PaymentTests COMMAND bankid_tests --gtest_filter=PaymentTest.*)
+set_tests_properties(PaymentTests PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR:bankid_tests>)
+
+add_test(NAME CancelTests COMMAND bankid_tests --gtest_filter=CancelTest.*)
+set_tests_properties(CancelTests PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR:bankid_tests>)
 
 # Set environment variables for tests to find shared libraries
 if(BUILD_SHARED_LIBS AND UNIX)
