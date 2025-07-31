@@ -116,6 +116,7 @@
     "xtr1common": "cpp",
     "xtree": "cpp",
     "xutility": "cpp",
-    "string_view": "cpp"
+    "string_view": "cpp",
+    "text_encoding": "cpp"
   }
 }

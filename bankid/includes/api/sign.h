@@ -35,7 +35,7 @@ namespace BankID::API
     /**
      * Constructor for SignConfig
      * @param endUserIp The IP address of the end user (required)
-     * @param userVisibleData Text displayed to the user during signing (required)
+     * @param userVisibleData Text displayed to the user during signing (required) BASE 64-encoded
      */
     SignConfig(const std::string &endUserIp, const std::string &userVisibleData)
         : m_endUserIp(endUserIp), m_userVisibleData(userVisibleData) {}
