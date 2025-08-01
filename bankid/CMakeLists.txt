@@ -24,6 +24,8 @@ else()
     add_library(bankid_lib STATIC ${BANKID_LIB_SOURCES})
 endif()
 
+add_library(BankID::bankid ALIAS bankid_lib)
+
 # Set library properties
 set_target_properties(bankid_lib PROPERTIES
     OUTPUT_NAME "bankid"
