@@ -1,3 +1,4 @@
+
 # BankID Library sources
 set(BANKID_LIB_SOURCES
   ${CMAKE_CURRENT_LIST_DIR}/bankid.cpp)
@@ -10,9 +11,11 @@ set(BANKID_INCLUDE_DIR
 find_package(OpenSSL REQUIRED)
 
 # Find the nolohmann_json package
-find_package(nlohmann_json REQUIRED)
+if(NOT TARGET nlohmann_json::nlohmann_json)
+    find_package(nlohmann_json REQUIRED)
+endif()
 
-# Create the BankID library (shared/static based on BUILD_SHARED_LIBS)
+# Create the BankID library (shared/static based on BUILD_SHARED_LIBS)  
 if(BUILD_SHARED_LIBS)
     add_library(bankid_lib SHARED ${BANKID_LIB_SOURCES})
     # Set symbol visibility for shared libraries
