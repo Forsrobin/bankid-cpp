@@ -462,7 +462,7 @@ int main() {
     BankID::SSLConfig sslConfig(BankID::Environment::TEST);
     BankID::Session session(sslConfig, true);
 
-    BankID::API::SignConfig signConfig("192.168.1.1", "VGhpcyBpcyBhIHRlc3QgZG9jdW1lbnQ=");
+    BankID::API::SignConfig signConfig("192.168.1.1", BankID::Base64::encode("This is a encoded message"));
     signConfig.setUserVisibleData("Please sign this document");
 
     auto signResult = session.sign(signConfig);
