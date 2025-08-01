@@ -365,7 +365,8 @@ if (signResult.has_value()) {
 
 ## SSL Certificate Setup
 
-> [!CAUTION] > **Certificates Required**: BankID APIs require valid SSL certificates. You must obtain test certificates from BankID to use this library.
+> [!CAUTION] 
+> **Certificates Required**: BankID APIs require valid SSL certificates. You must obtain test certificates from BankID to use this library.
 
 To use BankID APIs, you need SSL certificates in PEM format. BankID provides PKCS#12 (.p12) files that need to be converted.
 
