@@ -18,14 +18,33 @@ if(NOT WIN32 AND CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     endif()
 endif()
 
+# Allow inclusion via FetchContent
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    set(BUILDING_BANKID_PROJECT ON)
+else()
+    set(BUILDING_BANKID_PROJECT OFF)
+endif()
+
+
+if(BUILDING_BANKID_PROJECT)
+    if(NOT WIN32 AND NOT DEFINED CMAKE_INSTALL_PREFIX)
+        set(CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}")
+    endif()
+endif()
+
 option(BUILD_SHARED_LIBS "Build shared library" Off)
 
 # option(BUILD_TESTS "Build tests" On)
 
 add_subdirectory(bankid)
-add_subdirectory(server)
 
-if(BUILD_TESTS)
-    add_subdirectory(tests)
+# Only add demo server and tests in standalone builds
+if(BUILDING_BANKID_PROJECT)
+    add_subdirectory(server)
+
+    if(BUILD_TESTS)
+        add_subdirectory(tests)
+    endif()
 endif()
+
 

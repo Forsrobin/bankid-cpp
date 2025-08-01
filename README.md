@@ -1,3 +1,7 @@
+I've updated the README.md to include instructions for using FetchContent to include the BankID library in a CMake project, covering both static and dynamic linking options. Below is the updated README content, followed by instructions to download it as a file.
+
+---
+
 # BankID C++ Library and Server
 
 <div align="center">
@@ -13,6 +17,7 @@ A comprehensive C++ library and REST API server for BankID authentication, built
 - [Features](#features)
 - [Prerequisites](#prerequisites)
 - [Building and Configuration](#building-and-configuration)
+- [Using the Library with FetchContent](#using-the-library-with-fetchcontent)
 - [API Endpoints](#api-endpoints)
 - [Code Examples](#code-examples)
 - [SSL Certificate Setup](#ssl-certificate-setup)
@@ -97,8 +102,8 @@ This project provides a comprehensive **BankID C++ library** that implements the
 
 - **Visual Studio 2022** (MSVC v143 or later)
 - **CMake 3.28+**
-- **Conan 2.0+**
-- **Python 3.8+** (for Conan virtual environment)
+- **Conan 2.0+** (optional, for dependency management)
+- **Python 3.8+** (for Conan virtual environment or FetchContent)
 
 ### System Requirements
 
@@ -108,7 +113,7 @@ This project provides a comprehensive **BankID C++ library** that implements the
 
 ## Building and Configuration
 
-### 1. Setup Python Virtual Environment
+### 1. Setup Python Virtual Environment (Optional for Conan)
 
 ```bash
 # Create virtual environment for Conan
@@ -126,7 +131,7 @@ source conan_venv/Scripts/activate
 pip install conan>=2.0
 ```
 
-### 2. Install Dependencies
+### 2. Install Dependencies with Conan
 
 ```bash
 # Install dependencies and generate build files
@@ -177,6 +182,108 @@ Use the provided VS Code tasks:
 # Install to the configured prefix
 cmake --install build/vs2022-deb --config Debug
 ```
+
+## Using the Library with FetchContent
+
+You can include the BankID library in your CMake project using `FetchContent` for both static and dynamic linking. Below is an example of how to set up a minimal project that uses the BankID library.
+
+### Example CMake Project
+
+Create a `CMakeLists.txt` file for your project:
+
+```cmake
+cmake_minimum_required(VERSION 3.16)
+project(MinimalApp)
+
+# Include FetchContent module
+include(FetchContent)
+
+# Fetch nlohmann/json dependency (required by BankID)
+FetchContent_Declare(
+  json
+  URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+FetchContent_MakeAvailable(json)
+
+# Fetch BankID library
+FetchContent_Declare(
+  bankid
+  GIT_REPOSITORY https://github.com/Forsrobin/bankid-cpp.git
+  GIT_TAG fetch-content-cmake # or a specific commit or tag
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+FetchContent_MakeAvailable(bankid)
+
+# Static Linking
+add_executable(main_static main.cpp)
+target_link_libraries(main_static PRIVATE BankID::bankid_lib)
+target_compile_definitions(main_static PRIVATE BANKID_STATIC)
+
+# Dynamic Linking
+add_executable(main_dynamic main.cpp)
+target_link_libraries(main_dynamic PRIVATE BankID::bankid_lib)
+
+# Copy DLL to output directory for dynamic linking (Windows)
+if(WIN32)
+  add_custom_command(TARGET main_dynamic POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:BankID::bankid_lib>
+    $<TARGET_FILE_DIR:main_dynamic>
+  )
+endif()
+```
+
+### Example Main File
+
+Create a `main.cpp` file to test the library:
+
+```cpp
+#include <bankid.h>
+#include <iostream>
+
+int main() {
+    std::cout << BankID::Base64::encode("This is using the BankID API") << std::endl;
+    return 0;
+}
+```
+
+### Building the Example Project
+
+1. **Create Build Directory**:
+
+   ```bash
+   mkdir build && cd build
+   ```
+
+2. **Configure and Build**:
+
+   ```bash
+   cmake ..
+   cmake --build . --config Debug
+   ```
+
+3. **Run the Static Version**:
+
+   ```bash
+   ./Debug/main_static.exe
+   ```
+
+4. **Run the Dynamic Version**:
+
+   ```bash
+   ./Debug/main_dynamic.exe
+   ```
+
+> [!NOTE]
+> For dynamic linking on Windows, ensure the `bankid.dll` is in the same directory as `main_dynamic.exe` or in your system's PATH.
+
+### Notes on FetchContent
+
+- **Static vs. Dynamic Linking**: The example above shows how to build both static and dynamic versions. Use `BANKID_STATIC` for static linking to avoid DLL dependencies.
+- **Dependencies**: The BankID library requires `nlohmann/json`. Ensure it is fetched as shown in the example.
+- **Git Tag**: Replace `fetch-content-cmake` with the desired tag or commit hash from the `bankid-cpp` repository.
+- **Cross-Platform**: The `FetchContent` approach works on all platforms supported by CMake, though the DLL copying step is Windows-specific.
 
 ## API Endpoints
 
@@ -247,119 +354,124 @@ GET http://localhost:8080/poll
 > [!TIP] 
 > **Integration Focus**: These examples show how to integrate the BankID library into **your own application**. This is the primary use case for this library.
 
-### Integrating into Your CMake Project
-
-First, add the library to your CMake project:
-
-```cmake
-find_package(BankID REQUIRED)
-
-# Link against the library
-target_link_libraries(your_target PRIVATE BankID::bankid_lib)
-```
-
 ### Basic Library Usage
 
 ```cpp
-#include "bankid.h"
+#include <bankid.h>
+#include <iostream>
 
-const std::string socialSecurityNumber = "1234567891"
+int main() {
+    const std::string socialSecurityNumber = "1234567891";
 
-// Configure SSL for test environment
-BankID::SSLConfig sslConfig(BankID::Environment::TEST);
+    // Configure SSL for test environment
+    BankID::SSLConfig sslConfig(BankID::Environment::TEST);
 
-// Enable/disable debug logging
-const bool showDebug = true;
+    // Enable/disable debug logging
+    const bool showDebug = true;
 
-// Create session
-BankID::Session session(sslConfig, showDebug);
+    // Create session
+    BankID::Session session(sslConfig, showDebug);
 
-// Initialize the session
-if (!session.initialize())
-{
-  std::cerr << "Failed to initialize BankID session" << std::endl;
-  return -1;
-}
-
-BankID::Requirement requirement;
-requirement.personalNumber = socialSecurityNumber; // Example personal number from command line
-
-// Start authentication
-BankID::API::AuthConfig authConfig("192.168.1.1");
-authConfig.setRequirement(requirement);
-
-auto authResult = session.auth(authConfig);
-
-if (authResult.has_value())
-{
-  std::cout << "Authentication started. Order ref: "
-            << authResult->orderRef << std::endl;
-
-  // Poll for completion
-  BankID::API::CollectConfig collectConfig(authResult->orderRef);
-
-  while (true)
-  {
-    auto collectResult = session.collect(collectConfig);
-    if (collectResult.has_value())
-    {
-      if (collectResult->status == BankID::API::CollectStatus::COMPLETE)
-      {
-        std::cout << "Authentication completed successfully!" << std::endl;
-        std::cout << "Order ref: " << collectResult->orderRef << std::endl;
-        if (collectResult->completionData)
-        {
-          std::cout << "Completion data: " << collectResult->completionData->user->givenName.value_or("N/A") << std::endl;
-        }
-        break;
-      }
-      else if (collectResult->status == BankID::API::CollectStatus::PENDING)
-      {
-        std::cout << "Authentication still pending..." << std::endl;
-      }
-      else if (collectResult->status == BankID::API::CollectStatus::FAILED)
-      {
-        std::cout << "Authentication falses!" << std::endl;
-        break;
-      }
+    // Initialize the session
+    if (!session.initialize()) {
+        std::cerr << "Failed to initialize BankID session" << std::endl;
+        return -1;
     }
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-  }
+
+    BankID::Requirement requirement;
+    requirement.personalNumber = socialSecurityNumber; // Example personal number
+
+    // Start authentication
+    BankID::API::AuthConfig authConfig("192.168.1.1");
+    authConfig.setRequirement(requirement);
+
+    auto authResult = session.auth(authConfig);
+
+    if (authResult.has_value()) {
+        std::cout << "Authentication started. Order ref: "
+                  << authResult->orderRef << std::endl;
+
+        // Poll for completion
+        BankID::API::CollectConfig collectConfig(authResult->orderRef);
+
+        while (true) {
+            auto collectResult = session.collect(collectConfig);
+            if (collectResult.has_value()) {
+                if (collectResult->status == BankID::API::CollectStatus::COMPLETE) {
+                    std::cout << "Authentication completed successfully!" << std::endl;
+                    std::cout << "Order ref: " << collectResult->orderRef << std::endl;
+                    if (collectResult->completionData) {
+                        std::cout << "Completion data: " << collectResult->completionData->user->givenName.value_or("N/A") << std::endl;
+                    }
+                    break;
+                } else if (collectResult->status == BankID::API::CollectStatus::PENDING) {
+                    std::cout << "Authentication still pending..." << std::endl;
+                } else if (collectResult->status == BankID::API::CollectStatus::FAILED) {
+                    std::cout << "Authentication failed!" << std::endl;
+                    break;
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
+    } else {
+        std::cerr << "Authentication failed: " << authResult.error().details << std::endl;
+    }
+    return 0;
 }
-else
-{
-  std::cerr << "Authentication failed: " << authResult.error().details << std::endl;
-}
-  
 ```
 
 ### Advanced Authentication with Requirements
 
 ```cpp
-// Create authentication with specific requirements
-BankID::API::AuthConfig authConfig("192.168.1.1");
+#include <bankid.h>
+#include <iostream>
 
-BankID::Requirement requirement;
-requirement.personalNumber = "190000000000";  // Specific person
-requirement.pinCode = true;                   // Require PIN code
-requirement.mrtd = false;                     // Don't require MRTD
+int main() {
+    // Create authentication with specific requirements
+    BankID::API::AuthConfig authConfig("192.168.1.1");
 
-authConfig.setRequirement(requirement);
+    BankID::Requirement requirement;
+    requirement.personalNumber = "190000000000";  // Specific person
+    requirement.pinCode = true;                   // Require PIN code
+    requirement.mrtd = false;                     // Don't require MRTD
 
-// Start authentication
-auto result = session.auth(authConfig);
+    authConfig.setRequirement(requirement);
+
+    // Start authentication
+    BankID::SSLConfig sslConfig(BankID::Environment::TEST);
+    BankID::Session session(sslConfig, true);
+    auto result = session.auth(authConfig);
+
+    if (result.has_value()) {
+        std::cout << "Authentication started. Order ref: " << result->orderRef << std::endl;
+    } else {
+        std::cerr << "Authentication failed: " << result.error().details << std::endl;
+    }
+    return 0;
+}
 ```
 
 ### Document Signing
 
 ```cpp
-// Sign a document
-BankID::API::SignConfig signConfig("192.168.1.1", "VGhpcyBpcyBhIHRlc3QgZG9jdW1lbnQ=");
-signConfig.setUserVisibleData("Please sign this document");
+#include <bankid.h>
+#include <iostream>
 
-auto signResult = session.sign(signConfig);
-if (signResult.has_value()) {
-    std::cout << "Signing started. Order ref: " << signResult->orderRef << std::endl;
+int main() {
+    // Sign a document
+    BankID::SSLConfig sslConfig(BankID::Environment::TEST);
+    BankID::Session session(sslConfig, true);
+
+    BankID::API::SignConfig signConfig("192.168.1.1", "VGhpcyBpcyBhIHRlc3QgZG9jdW1lbnQ=");
+    signConfig.setUserVisibleData("Please sign this document");
+
+    auto signResult = session.sign(signConfig);
+    if (signResult.has_value()) {
+        std::cout << "Signing started. Order ref: " << signResult->orderRef << std::endl;
+    } else {
+        std::cerr << "Signing failed: " << signResult.error().details << std::endl;
+    }
+    return 0;
 }
 ```
 
@@ -418,18 +530,28 @@ The library includes a built-in QR code generator for seamless user experience.
 ### Basic QR Code Usage
 
 ```cpp
-// Create QR generator (typically from auth response)
-BankID::QRGenerator qrGen(qrStartToken, qrStartSecret);
+#include <bankid.h>
+#include <iostream>
 
-// Generate QR codes in a loop
-while (!qrGen.isExpired()) {
-    auto qrCode = qrGen.getNextQRCode();
-    if (qrCode.has_value()) {
-        std::cout << "QR Code: " << qrCode.value() << std::endl;
+int main() {
+    // Example QR start token and secret (replace with actual values from auth response)
+    std::string qrStartToken = "example_start_token";
+    std::string qrStartSecret = "example_start_secret";
 
-        // Display QR code to user and wait
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+    // Create QR generator
+    BankID::QRGenerator qrGen(qrStartToken, qrStartSecret);
+
+    // Generate QR codes in a loop
+    while (!qrGen.isExpired()) {
+        auto qrCode = qrGen.getNextQRCode();
+        if (qrCode.has_value()) {
+            std::cout << "QR Code: " << qrCode.value() << std::endl;
+
+            // Display QR code to user and wait
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
     }
+    return 0;
 }
 ```
 
@@ -438,58 +560,84 @@ while (!qrGen.isExpired()) {
 The library provides automatic QR code caching for managing multiple concurrent authentications:
 
 ```cpp
-// Get the singleton cache instance
-auto& cache = BankID::QRGeneratorCache::instance();
+#include <bankid.h>
+#include <iostream>
 
-// Add a generator to cache
-cache.add(orderRef, qrStartToken, qrStartSecret);
+int main() {
+    // Get the singleton cache instance
+    auto& cache = BankID::QRGeneratorCache::instance();
 
-// Get generator from cache
-auto generator = cache.get(orderRef);
-if (generator) {
-    auto nextCode = generator->getNextQRCode();
+    // Example order reference, start token, and secret
+    std::string orderRef = "example_order_ref";
+    std::string qrStartToken = "example_start_token";
+    std::string qrStartSecret = "example_start_secret";
+
+    // Add a generator to cache
+    cache.add(orderRef, qrStartToken, qrStartSecret);
+
+    // Get generator from cache
+    auto generator = cache.get(orderRef);
+    if (generator) {
+        auto nextCode = generator->getNextQRCode();
+        if (nextCode.has_value()) {
+            std::cout << "Next QR Code: " << nextCode.value() << std::endl;
+        }
+    }
+
+    // Remove from cache when done
+    cache.remove(orderRef);
+    return 0;
 }
-
-// Remove from cache when done
-cache.remove(orderRef);
 ```
 
 ### QR Code Integration Example
 
 ```cpp
-// Start authentication and setup QR generation
-auto authResult = session.auth(authConfig);
-if (authResult.has_value()) {
-    // Add to QR cache
-    auto& qrCache = BankID::QRGeneratorCache::instance();
-    qrCache.add(authResult->orderRef,
-                authResult->qrStartToken,
-                authResult->qrStartSecret);
+#include <bankid.h>
+#include <iostream>
+#include <thread>
 
-    // Generate QR codes while polling
-    BankID::API::CollectConfig collectConfig(authResult->orderRef);
-    auto qrGenerator = qrCache.get(authResult->orderRef);
+int main() {
+    BankID::SSLConfig sslConfig(BankID::Environment::TEST);
+    BankID::Session session(sslConfig, true);
 
-    while (true) {
-        // Check authentication status
-        auto collectResult = session.collect(collectConfig);
+    BankID::API::AuthConfig authConfig("192.168.1.1");
+    auto authResult = session.auth(authConfig);
 
-        // Generate new QR code
-        if (qrGenerator && !qrGenerator->isExpired()) {
-            auto qrCode = qrGenerator->getNextQRCode();
-            if (qrCode.has_value()) {
-                // Display new QR code to user
-                displayQRCode(qrCode.value());
+    if (authResult.has_value()) {
+        // Add to QR cache
+        auto& qrCache = BankID::QRGeneratorCache::instance();
+        qrCache.add(authResult->orderRef,
+                    authResult->qrStartToken,
+                    authResult->qrStartSecret);
+
+        // Generate QR codes while polling
+        BankID::API::CollectConfig collectConfig(authResult->orderRef);
+        auto qrGenerator = qrCache.get(authResult->orderRef);
+
+        while (true) {
+            // Check authentication status
+            auto collectResult = session.collect(collectConfig);
+
+            // Generate new QR code
+            if (qrGenerator && !qrGenerator->isExpired()) {
+                auto qrCode = qrGenerator->getNextQRCode();
+                if (qrCode.has_value()) {
+                    // Display new QR code to user (simulated here)
+                    std::cout << "QR Code: " << qrCode.value() << std::endl;
+                }
             }
-        }
 
-        if (collectResult.has_value() && collectResult->status == "COMPLETED") {
-            qrCache.remove(authResult->orderRef);
-            break;
-        }
+            if (collectResult.has_value() && collectResult->status == BankID::API::CollectStatus::COMPLETE) {
+                qrCache.remove(authResult->orderRef);
+                std::cout << "Authentication completed!" << std::endl;
+                break;
+            }
 
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
     }
+    return 0;
 }
 ```
 
@@ -545,7 +693,7 @@ The test suite covers:
 
 ```cpp
 #include <gtest/gtest.h>
-#include "bankid.h"
+#include <bankid.h>
 
 class MyBankIDTest : public ::testing::Test {
 protected:
@@ -583,11 +731,22 @@ cmake --preset vs2022-deb
 cmake --build build/vs2022-deb --config Debug
 ```
 
-**Usage:**
+**Usage in CMake with FetchContent**:
 
-```cpp
-// No special considerations needed
-#include "bankid.h"
+```cmake
+# Fetch BankID library
+FetchContent_Declare(
+  bankid
+  GIT_REPOSITORY https://github.com/Forsrobin/bankid-cpp.git
+  GIT_TAG fetch-content-cmake
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+FetchContent_MakeAvailable(bankid)
+
+# Static linking
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE BankID::bankid_lib)
+target_compile_definitions(my_app PRIVATE BANKID_STATIC)
 ```
 
 **Output Files:**
@@ -611,11 +770,30 @@ cmake --preset vs2022-deb-shared
 cmake --build build/vs2022-deb-shared --config Debug
 ```
 
-**Usage:**
+**Usage in CMake with FetchContent**:
 
-```cpp
-// Same API, but requires DLL at runtime
-#include "bankid.h"
+```cmake
+# Fetch BankID library
+FetchContent_Declare(
+  bankid
+  GIT_REPOSITORY https://github.com/Forsrobin/bankid-cpp.git
+  GIT_TAG fetch-content-cmake
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+FetchContent_MakeAvailable(bankid)
+
+# Dynamic linking
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE BankID::bankid_lib)
+
+# Copy DLL to output directory (Windows)
+if(WIN32)
+  add_custom_command(TARGET my_app POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:BankID::bankid_lib>
+    $<TARGET_FILE_DIR:my_app>
+  )
+endif()
 ```
 
 **Output Files:**
@@ -632,34 +810,6 @@ The library uses preprocessor macros to handle different linking modes:
 - `BANKID_STATIC` - Define when linking statically
 - `BANKID_EXPORTS` - Automatically defined when building the DLL
 - `BANKID_API` - Macro that resolves to appropriate export/import attributes
-
-### Integration Examples
-
-#### Static Linking in CMake
-
-```cmake
-# Find the static library
-find_package(BankID REQUIRED)
-target_link_libraries(your_app PRIVATE BankID::bankid_lib)
-
-# Define static linking
-target_compile_definitions(your_app PRIVATE BANKID_STATIC)
-```
-
-#### Dynamic Linking in CMake
-
-```cmake
-# Find the DLL
-find_package(BankID REQUIRED)
-target_link_libraries(your_app PRIVATE BankID::bankid_lib)
-
-# Ensure DLL is copied to output directory
-add_custom_command(TARGET your_app POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    $<TARGET_FILE:BankID::bankid_lib>
-    $<TARGET_FILE_DIR:your_app>
-)
-```
 
 ## ⚠️ Certificate Security Warning
 
@@ -694,7 +844,6 @@ add_custom_command(TARGET your_app POST_BUILD
 4. **Environment-based Configuration**:
 
    ```cpp
-   // Use environment variables for certificate paths
    const char* caPath = std::getenv("BANKID_CA_PATH");
    const char* certPath = std::getenv("BANKID_CERT_PATH");
    const char* keyPath = std::getenv("BANKID_KEY_PATH");
@@ -707,6 +856,7 @@ add_custom_command(TARGET your_app POST_BUILD
    ```
 
 5. **Certificate Validation**: Always validate certificates before use:
+
    ```cpp
    if (!sslConfig.validate()) {
        throw std::runtime_error("Invalid SSL configuration");
@@ -737,7 +887,7 @@ We welcome contributions to improve the BankID C++ library! Here's how you can h
 1. **Fork the Repository**
 
    ```bash
-   git fork https://github.com/Forsrobin/bankid-cpp.git
+   git clone https://github.com/Forsrobin/bankid-cpp.git
    cd bankid-cpp
    ```
 
@@ -793,6 +943,7 @@ We welcome contributions to improve the BankID C++ library! Here's how you can h
    ```
 
 4. **Submit Pull Request**
+
    - Provide clear description of changes
    - Link to any related issues
    - Ensure all tests pass
