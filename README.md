@@ -275,8 +275,8 @@ int main() {
    ./Debug/main_dynamic.exe
    ```
 
-   > [!NOTE]
-   > For dynamic linking on Windows, ensure the `bankid.dll` is in the same directory as `main_dynamic.exe` or in your system's PATH.
+> [!NOTE]
+> For dynamic linking on Windows, ensure the `bankid.dll` is in the same directory as `main_dynamic.exe` or in your system's PATH.
 
 ### Notes on FetchContent
 
