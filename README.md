@@ -431,7 +431,7 @@ int main() {
     BankID::API::AuthConfig authConfig("192.168.1.1");
 
     BankID::Requirement requirement;
-    requirement.personalNumber = "190000000000";  // Specific person
+    requirement.personalNumber = "199901011234";  // Specific person
     requirement.pinCode = true;                   // Require PIN code
     requirement.mrtd = false;                     // Don't require MRTD
 
