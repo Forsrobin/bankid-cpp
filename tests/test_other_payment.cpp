@@ -280,7 +280,7 @@ TEST_F(OtherPayment, PersonalNumberOtherPaymentAlreadyInProgress)
   BankID::API::OtherPaymentConfig config("200001010101", transaction);
 
   BankID::Requirement requirement;
-  requirement.personalNumber = "200003121145";
+  requirement.personalNumber = "200003121155";
 
   config.setRequirement(requirement);
 

@@ -131,7 +131,7 @@ TEST_F(PhoneAuthTest, PhoneAuthenticationInvalidParameters)
 TEST_F(PhoneAuthTest, PersonalNumberPhoneAuthenticationAlreadyInProgress)
 {
 
-  BankID::API::PhoneAuthConfig config = BankID::API::PhoneAuthConfig::createWithPersonalNumber("user", "200003121145");
+  BankID::API::PhoneAuthConfig config = BankID::API::PhoneAuthConfig::createWithPersonalNumber("user", "200003121175");
 
   // Make the API call
   auto response = session->phoneAuth(config);

@@ -143,7 +143,7 @@ TEST_F(PhoneSignTest, PhoneSignenticationInvalidParameters)
 TEST_F(PhoneSignTest, PersonalNumberPhoneSignenticationAlreadyInProgress)
 {
 
-  BankID::API::PhoneSignConfig config = BankID::API::PhoneSignConfig::createWithPersonalNumber("user", BankID::Base64::encode("Test data"), "200003121145");
+  BankID::API::PhoneSignConfig config = BankID::API::PhoneSignConfig::createWithPersonalNumber("user", BankID::Base64::encode("Test data"), "200003121185");
 
   // Make the API call
   auto response = session->phoneSign(config);
