@@ -1,7 +1,3 @@
-I've updated the README.md to include instructions for using FetchContent to include the BankID library in a CMake project, covering both static and dynamic linking options. Below is the updated README content, followed by instructions to download it as a file.
-
----
-
 # BankID C++ Library and Server
 
 <div align="center">

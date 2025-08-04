@@ -19,9 +19,9 @@ add_executable(bankid_tests
     test_sign.cpp
     test_payment.cpp
     test_other_payment.cpp
-    # test_phone_auth.cpp
-    # test_phone_sign.cpp
-    # test_collect.cpp
+    test_phone_auth.cpp
+    test_phone_sign.cpp
+    test_collect.cpp
     test_cancel.cpp
 )
 
@@ -130,6 +130,15 @@ set_tests_properties(PaymentTests PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR
 
 add_test(NAME OtherPaymentTests COMMAND bankid_tests --gtest_filter=OtherPaymentTest.*)
 set_tests_properties(OtherPaymentTests PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR:bankid_tests>)
+
+add_test(NAME PhoneAuthTests COMMAND bankid_tests --gtest_filter=PhoneAuthTest.*)
+set_tests_properties(PhoneAuthTests PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR:bankid_tests>)
+
+add_test(NAME PhoneSignTests COMMAND bankid_tests --gtest_filter=PhoneSignTest.*)
+set_tests_properties(PhoneSignTests PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR:bankid_tests>)
+
+add_test(NAME CollectTests COMMAND bankid_tests --gtest_filter=CollectTest.*)
+set_tests_properties(CollectTests PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR:bankid_tests>)
 
 add_test(NAME CancelTests COMMAND bankid_tests --gtest_filter=CancelTest.*)
 set_tests_properties(CancelTests PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR:bankid_tests>)
