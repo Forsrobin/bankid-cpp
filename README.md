@@ -206,7 +206,7 @@ FetchContent_MakeAvailable(json)
 FetchContent_Declare(
   bankid
   GIT_REPOSITORY https://github.com/Forsrobin/bankid-cpp.git
-  GIT_TAG fetch-content-cmake # or a specific commit or tag
+  GIT_TAG main # or a specific commit or tag
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(bankid)
@@ -278,7 +278,7 @@ int main() {
 
 - **Static vs. Dynamic Linking**: The example above shows how to build both static and dynamic versions. Use `BANKID_STATIC` for static linking to avoid DLL dependencies.
 - **Dependencies**: The BankID library requires `nlohmann/json`. Ensure it is fetched as shown in the example.
-- **Git Tag**: Replace `fetch-content-cmake` with the desired tag or commit hash from the `bankid-cpp` repository.
+- **Git Tag**: Replace `main` with the desired tag or commit hash from the `bankid-cpp` repository.
 - **Cross-Platform**: The `FetchContent` approach works on all platforms supported by CMake, though the DLL copying step is Windows-specific.
 
 ## API Endpoints
@@ -769,7 +769,7 @@ cmake --build build/vs2022-deb --config Debug
 FetchContent_Declare(
   bankid
   GIT_REPOSITORY https://github.com/Forsrobin/bankid-cpp.git
-  GIT_TAG fetch-content-cmake
+  GIT_TAG main
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(bankid)
@@ -808,7 +808,7 @@ cmake --build build/vs2022-deb-shared --config Debug
 FetchContent_Declare(
   bankid
   GIT_REPOSITORY https://github.com/Forsrobin/bankid-cpp.git
-  GIT_TAG fetch-content-cmake
+  GIT_TAG main
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(bankid)
