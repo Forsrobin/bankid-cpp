@@ -305,7 +305,7 @@ TEST_F(SignTest, PersonalNumberSigningAlreadyInProgress)
   BankID::API::SignConfig config("127.0.0.1", BankID::Base64::encode("This is a sample text to be signed"));
 
   BankID::Requirement requirement;
-  requirement.personalNumber = "200003121145";
+  requirement.personalNumber = "200003121195";
 
   config.setRequirement(requirement);
 

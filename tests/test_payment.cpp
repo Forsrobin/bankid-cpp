@@ -356,7 +356,7 @@ TEST_F(Payment, PersonalNumberPaymentAlreadyInProgress)
   BankID::API::PaymentConfig config("127.0.0.1", transaction);
 
   BankID::Requirement requirement;
-  requirement.personalNumber = "200003121145";
+  requirement.personalNumber = "200003121165";
 
   config.setRequirement(requirement);
 
