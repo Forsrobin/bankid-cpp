@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(BANKID LANGUAGES CXX
     VERSION 0.1.0
     DESCRIPTION "BankID - A Modern & Safe Authentication Method Implementation in C++"
-    HOMEPAGE_URL "https://github.com/Forsrobin/bankID-auth-examples")
+    HOMEPAGE_URL "https://github.com/Forsrobin/bankid-cpp")
 
 # Must compile with C++23, no
 # extensions
