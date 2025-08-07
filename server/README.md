@@ -1,40 +1,54 @@
 # BankID REST API Server
 
-A simple REST API server built with CrowCpp that provides BankID authentication endpoints using the BankID library.
+A lightweight REST API server built with **CrowCpp**, providing simple BankID authentication endpoints using the **BankID C++ library**.
 
-## Getting Started
+---
 
-### Building and Running
+## 🚀 Getting Started
 
-1. **Build the server**:
-   ```bash
-   # Use VS Code task: Ctrl+Shift+P -> "Tasks: Run Task" -> "Build Static Library (Debug)"
-   # Or use command line:
-   cmake --preset vs2022-deb
-   cmake --build build/vs2022-deb --config Debug
-   ```
+### 🛠 Build & Run
 
-2. **Run the server**:
-   ```bash
-   # Use VS Code task: Ctrl+Shift+P -> "Tasks: Run Task" -> "Run Server (Static)"
-   # Or use command line:
-   build/vs2022-deb/server/Debug/bankid_server.exe
-   ```
+#### 1. **Build the server**
 
-The server will start on `http://localhost:8080`
+You can build the server using either **VS Code tasks** or the **command line**:
 
-## API Endpoints
+**Via VS Code:**
+- Press `Ctrl + Shift + P`
+- Select: `Tasks: Run Task` → `Build Static Library (Debug)`
 
-### GET /init
+**Via Command Line:**
+```bash
+cmake --preset vs2022-deb
+cmake --build build/vs2022-deb --config Debug
+```
+
+#### 2. **Run the server**
+
+**Via VS Code:**
+- Press `Ctrl + Shift + P`
+- Select: `Tasks: Run Task` → `Run Server (Static)`
+
+**Via Command Line:**
+```bash
+build/vs2022-deb/server/Debug/bankid_server.exe
+```
+
+Server starts at: [http://localhost:8080](http://localhost:8080)
+
+---
+
+## 📡 API Endpoints
+
+### 🔹 `GET /init` – Start Authentication
 
 Initiates a new BankID authentication session.
 
-**Request:**
+#### Request:
 ```
 GET http://localhost:8080/init
 ```
 
-**Response:**
+#### Example Response:
 ```json
 {
   "status": "success",
@@ -43,59 +57,81 @@ GET http://localhost:8080/init
 }
 ```
 
-**Status Codes:**
-- `200` - Authentication initiated successfully
-- `500` - Failed to initialize BankID or start authentication
+#### Status Codes:
+- `200 OK` – Authentication started
+- `500 Internal Server Error` – Failed to initialize BankID or start session
 
-### GET /poll
+---
 
-Checks the status of the current authentication session.
+### 🔹 `GET /poll` – Poll Authentication Status
 
-**Request:**
+Polls the current status of the ongoing BankID session.
+
+#### Request:
 ```
 GET http://localhost:8080/poll
 ```
 
-**Response:**
+#### Example Response:
 ```json
 {
-  "status": "success", 
+  "status": "success",
   "token": "auth_token_1753129021044",
   "auth_status": "COMPLETED"
 }
 ```
 
-**Status Codes:**
-- `200` - Status retrieved successfully
-- `400` - No active authentication session
-- `500` - BankID library not initialized
+#### Status Codes:
+- `200 OK` – Status retrieved
+- `400 Bad Request` – No active session
+- `500 Internal Server Error` – BankID not initialized
 
-## Example Usage
+---
+
+## 🧪 Example Usage (cURL)
 
 ```bash
-# Start authentication
+# Start a BankID authentication session
 curl -X GET http://localhost:8080/init
 
-# Check authentication status
+# Poll the session status
 curl -X GET http://localhost:8080/poll
 ```
 
-## Architecture
+---
 
-- **Server Framework**: CrowCpp for REST API
-- **Authentication**: BankID library (linked as static library or DLL)
-- **JSON Responses**: Simple string concatenation (no external JSON library dependency)
-- **Threading**: Multi-threaded server using Crow's built-in threading
+## ⚙️ Architecture Overview
 
-## Development
+- **Framework**: [CrowCpp](https://github.com/CrowCpp/crow) for HTTP routing
+- **Auth Layer**: BankID C++ library (linked as static or shared)
+- **JSON Handling**: Simple string formatting (no external JSON dependency)
+- **Concurrency**: Multi-threaded using Crow’s thread pool
 
-The server is designed to be simple and focuses on demonstrating the integration between:
-1. **CrowCpp** - Handling HTTP requests and responses
-2. **BankID Library** - Authentication logic
-3. **CMake** - Build system integration
+---
 
-### VS Code Tasks Available:
-- `Run Server (Static)` - Run server with static library linkage
-- `Run Server (Shared)` - Run server with DLL linkage
-- `Build Static Library (Debug)` - Build with static linkage
-- `Build Shared Library (Debug)` - Build with DLL linkage
+## 👨‍💻 Development Notes
+
+This server is structured to demonstrate clean separation between:
+
+- **CrowCpp** – REST API request handling  
+- **BankID Integration** – Secure authentication logic  
+- **CMake** – Cross-platform build system
+
+---
+
+## 📋 VS Code Tasks
+
+The following tasks are available in `.vscode/tasks.json`:
+
+| Task Name                | Description                       |
+|--------------------------|-----------------------------------|
+| `Build Static Library`   | Build using static linking        |
+| `Build Shared Library`   | Build using DLL/shared linking    |
+| `Run Server (Static)`    | Run server with static linkage    |
+| `Run Server (Shared)`    | Run server with DLL linkage       |
+
+---
+
+## 📄 License
+
+This project is for demonstration and educational purposes. Licensing details for the BankID library must be obtained from the official provider.
