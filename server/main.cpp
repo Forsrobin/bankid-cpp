@@ -18,6 +18,7 @@
 *       and their expiration.
 */
 
+// Can use inline if you want to remove this
 std::unique_ptr<WebServer> server;
 
 void handleShutdown(int signal)
