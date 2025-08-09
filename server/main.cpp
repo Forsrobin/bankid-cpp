@@ -4,21 +4,20 @@
 #include <memory>
 
 /**
-* @file main.cpp
-* @brief Main entry point for the BankID server application.
-*
-* This file initializes the web server and handles graceful shutdown.
-* It sets up signal handlers for cleanup on termination.
-* It also provides a usage message if no port is specified.
+ * @file main.cpp
+ * @brief Main entry point for the BankID server application.
+ *
+ * This file initializes the web server and handles graceful shutdown.
+ * It sets up signal handlers for cleanup on termination.
+ * It also provides a usage message if no port is specified.
+ 
+ * @note The server runs on the specified port and listens for incoming requests.
+ * @note The server is designed to handle BankID authentication requests.
+ * @note The application will clean up resources and shut down gracefully on receiving termination signals.
+ * @note The server uses a singleton pattern for the QR code generator cache to manage QR codes
+ *       and their expiration.
+ */
 
-* @note The server runs on the specified port and listens for incoming requests.
-* @note The server is designed to handle BankID authentication requests.
-* @note The application will clean up resources and shut down gracefully on receiving termination signals.
-* @note The server uses a singleton pattern for the QR code generator cache to manage QR codes
-*       and their expiration.
-*/
-
-// Can use inline if you want to remove this
 std::unique_ptr<WebServer> server;
 
 void handleShutdown(int signal)
@@ -33,7 +32,7 @@ void handleShutdown(int signal)
 
 int main(int argc, char *argv[])
 {
-
+  
   if (argc < 2)
   {
     std::cerr << "Usage: bankid_server.exe <port>" << std::endl;

@@ -325,6 +325,7 @@ namespace BankID
     std::string m_qrStartSecret;
     std::chrono::steady_clock::time_point m_creationTime;
 
+  private:
     int getElapsedSeconds() const;
     std::string computeAuthCode(int seconds) const;
   };
@@ -341,13 +342,12 @@ namespace BankID
   class BANKID_API QRGeneratorCache
   {
   public:
-    static QRGeneratorCache &instance();
-
-    void add(const std::string &orderRef, const std::string &qrStartToken, const std::string &qrStartSecret);
     std::shared_ptr<QRGenerator> get(const std::string &orderRef);
+  
+    static QRGeneratorCache &instance();
+    void add(const std::string &orderRef, const std::string &qrStartToken, const std::string &qrStartSecret);
     void remove(const std::string &orderRef);
-
-    void shutdown(); // Graceful stop
+    void shutdown();
 
   private:
     QRGeneratorCache();
@@ -355,9 +355,9 @@ namespace BankID
 
     void cleanupLoop();
 
+  private:
     std::unordered_map<std::string, std::shared_ptr<QRGenerator>> m_cache;
     std::mutex m_cacheMutex;
-
     std::thread m_cleanerThread;
     std::condition_variable m_cv;
     std::mutex cv_mutex;
