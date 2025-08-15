@@ -964,7 +964,7 @@ We welcome contributions to improve the BankID C++ library! Here's how you can h
 3. **Test Your Changes**
 
    ```bash
-   # Run all tests
+   # Run all tests locally
    build/vs2022-deb/tests/Debug/bankid_tests.exe
 
    # Test both static and shared builds
