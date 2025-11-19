@@ -20,7 +20,7 @@ A comprehensive C++ library and REST API server for BankID authentication, built
 - [QR Code Generation](#qr-code-generation)
 - [Running Tests](#running-tests)
 - [Library Linking Options](#library-linking-options)
-- [⚠️ Certificate Security Warning](#️-certificate-security-warning)
+- [Certificate Security Warning](#️-certificate-security-warning)
 - [Contributing](#contributing)
 - [Contact](#contact)
 
@@ -816,9 +816,9 @@ The library uses preprocessor macros to handle different linking modes:
 - `BANKID_EXPORTS` - Automatically defined when building the DLL
 - `BANKID_API` - Macro that resolves to appropriate export/import attributes
 
-## ⚠️ Certificate Security Warning
+## Certificate Security Warning
 
-### 🔒 CRITICAL SECURITY NOTICE
+### CRITICAL SECURITY NOTICE
 
 **NEVER commit real certificates or private keys to version control!**
 
@@ -870,13 +870,13 @@ The library uses preprocessor macros to handle different linking modes:
 
 ### What's Safe to Commit
 
-✅ **Safe to commit:**
+**Safe to commit:**
 
 - CA files provided by BankID (`test.ca`, `prod.ca`)
 - Configuration templates
 - Documentation
 
-❌ **NEVER commit:**
+**NEVER commit:**
 
 - Private keys (`.key`, `.pem` private keys)
 - Client certificates (`.p12`, `.crt`, `.pem` certificates)
