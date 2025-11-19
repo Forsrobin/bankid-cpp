@@ -45,32 +45,6 @@ This project provides a comprehensive **BankID C++ library** that implements the
 > [!WARNING] 
 > **Important**: To test the library or demo server, you will need a **BankID test account** and valid test certificates from BankID.
 
-## Project Structure
-
-```
-├── bankid/                     # 🎯 Core BankID Library (Main Focus)
-│   ├── bankid.cpp             # Library implementation
-│   ├── includes/
-│   │   ├── bankid.h           # Main public API header
-│   │   └── api/               # API endpoint configurations
-│   │       ├── auth.h         # Authentication endpoint
-│   │       ├── sign.h         # Signing endpoint
-│   │       ├── payment.h      # Payment endpoint
-│   │       ├── phone.auth.h   # Phone authentication
-│   │       ├── phone.sign.h   # Phone signing
-│   │       ├── other.payment.h # Other payment methods
-│   │       ├── collect.h      # Status collection
-│   │       ├── cancel.h       # Order cancellation
-│   │       └── responses.h    # Response structures
-├── server/                     # 📋 Example HTTP Server (Demo Only)
-│   ├── main.cpp               # Simple demo server
-│   ├── certs/                 # SSL certificates
-│   └── includes/
-├── tests/                      # Unit tests
-├── build/                      # Build outputs
-└── conan/                      # Conan dependencies
-```
-
 ## Features
 
 ### BankID API Endpoints
